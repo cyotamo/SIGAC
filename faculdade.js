@@ -79,15 +79,18 @@
       };
     }
 
-    async function carregarDoBackend() {
-      const res = await fetch(API_URL, { method: "GET" });
+    async function carregarDoBackend(estado) {
+      const url = estado ? `${API_URL}?estado=${encodeURIComponent(estado)}` : API_URL;
+
+      const res = await fetch(url, { method: "GET" });
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data || data.sucesso !== true || !Array.isArray(data.dados)) {
-        const detalhes = (data && data.mensagem) || `HTTP ${res.status}`;
-        throw new Error(`Falha ao carregar dados: ${detalhes}`);
+        console.log("RESPOSTA GET ->", data);
+        throw new Error((data && data.mensagem) || `HTTP ${res.status}`);
       }
 
+      // limpar arrays sempre que recarrega
       state.cadastradas = [];
       state.executadas = [];
       state.canceladas = [];
@@ -95,9 +98,16 @@
       data.dados.forEach((item, idx) => {
         const a = normalizarDoBackend(item, idx);
 
+        // Se pedimos "Cancelada", só enche canceladas (evita trabalho extra)
+        if (estado === "Cancelada") {
+          state.canceladas.unshift(a);
+          return;
+        }
+
+        // caso geral: distribuir por estado
         if (a.estado === "Executada") state.executadas.unshift(a);
         else if (a.estado === "Cancelada") state.canceladas.unshift(a);
-        else if (a.estado === "Planificada" || a.estado === "Adiada") state.cadastradas.unshift(a);
+        else state.cadastradas.unshift(a); // Planificada/Adiada
       });
 
       render();
@@ -230,11 +240,21 @@
 
     document.querySelectorAll(".tab").forEach(btn => {
       btn.addEventListener("click", async () => {
-        const tabName = btn.dataset.tab;
-        switchTab(tabName);
+        const tab = btn.dataset.tab;
+        switchTab(tab);
 
-        if (["cadastradas", "executadas", "canceladas", "relatorio"].includes(tabName)) {
-          await carregarDoBackend().catch(console.error);
+        try {
+          if (tab === "canceladas") {
+            await carregarDoBackend("Cancelada");
+          } else if (tab === "executadas") {
+            await carregarDoBackend();
+          } else if (tab === "cadastradas") {
+            await carregarDoBackend();
+          } else if (tab === "relatorio") {
+            await carregarDoBackend();
+          }
+        } catch (err) {
+          console.error(err);
         }
       });
     });
