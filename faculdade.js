@@ -53,6 +53,56 @@
       return data;
     }
 
+    function normalizarDoBackend(item, idx) {
+      return {
+        id: item.id,
+        num: String(idx + 1),
+        area: item.area,
+        accao: item.acao,
+        obj: item.objectivos,
+        indicador: item.indicador,
+        local: item.localizacao,
+        metas: { t1: item.metaT1, t2: item.metaT2, t3: item.metaT3, t4: item.metaT4 },
+        metaAnual: item.metaAnual,
+        benef: { total: item.benefTotal, h: item.homens, m: item.mulheres },
+        orcamento: item.orcamentoMZN,
+        fonte: item.fonteFin,
+        resp: item.responsavel,
+        inicio: item.periodoInicio,
+        fim: item.periodoFim,
+        nota: item.observacoes,
+        estado: item.estado,
+        motivo: item.motivo,
+        evidenciasText: item.linkEvidencias || "",
+        evidenciasCount: item.linkEvidencias ? 1 : 0,
+        createdAt: item.dataRegisto
+      };
+    }
+
+    async function carregarDoBackend() {
+      const res = await fetch(API_URL, { method: "GET" });
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data || data.sucesso !== true || !Array.isArray(data.dados)) {
+        const detalhes = (data && data.mensagem) || `HTTP ${res.status}`;
+        throw new Error(`Falha ao carregar dados: ${detalhes}`);
+      }
+
+      state.cadastradas = [];
+      state.executadas = [];
+      state.canceladas = [];
+
+      data.dados.forEach((item, idx) => {
+        const a = normalizarDoBackend(item, idx);
+
+        if (a.estado === "Executada") state.executadas.unshift(a);
+        else if (a.estado === "Cancelada") state.canceladas.unshift(a);
+        else if (a.estado === "Planificada" || a.estado === "Adiada") state.cadastradas.unshift(a);
+      });
+
+      render();
+    }
+
     // ---------------------------
     const state = {
       cadastradas: [],
@@ -179,7 +229,14 @@
     }
 
     document.querySelectorAll(".tab").forEach(btn => {
-      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+      btn.addEventListener("click", async () => {
+        const tabName = btn.dataset.tab;
+        switchTab(tabName);
+
+        if (["cadastradas", "executadas", "canceladas", "relatorio"].includes(tabName)) {
+          await carregarDoBackend().catch(console.error);
+        }
+      });
     });
 
     $("#btnRelatorioTopo").addEventListener("click", () => switchTab("relatorio"));
@@ -237,7 +294,7 @@
         inicio: $("#inicio").value,
         fim: $("#fim").value,
         nota: $("#nota").value.trim(),
-        estado: "Planificado",
+        estado: "Planificada",
         motivo: "",
         evidenciasText: "",
         evidenciasCount: 0,
@@ -248,8 +305,8 @@
         if (submitButton) submitButton.disabled = true;
 
         await enviarParaBackend(a);
+        await carregarDoBackend();
 
-        state.cadastradas.unshift(a);
         form.reset();
         $("#area").value = "Pós-Graduação";
         $("#fonte").value = "OE";
@@ -257,7 +314,6 @@
         updateBeneficiariosTotal();
 
         switchTab("cadastradas");
-        render();
         alert("Gravado com sucesso");
       } catch (err) {
         console.error(err);
@@ -284,7 +340,7 @@
       $("#mAccao").value = a.accao || "";
       $("#mInicio").value = a.inicio || "";
       $("#mFim").value = a.fim || "";
-      $("#mEstado").value = a.estado || "Planificado";
+      $("#mEstado").value = a.estado || "Planificada";
       $("#mResp").value = a.resp || "";
       $("#mMotivo").value = a.motivo || "";
       $("#mLinks").value = a.evidenciasText || "";
@@ -315,6 +371,7 @@
       const novoEstado = $("#mEstado").value;
       const links = $("#mLinks").value.trim();
       const ficheiros = $("#mFicheiros").files?.length || 0;
+      const primeiroLink = links.split(",").map(s => s.trim()).filter(Boolean)[0] || "";
 
       a.accao = $("#mAccao").value.trim();
       a.inicio = $("#mInicio").value;
@@ -322,15 +379,17 @@
       a.resp = $("#mResp").value.trim();
       a.estado = novoEstado;
       a.motivo = $("#mMotivo").value.trim();
-      a.evidenciasText = links;
-      a.evidenciasCount = (links ? links.split(",").map(s=>s.trim()).filter(Boolean).length : 0) + ficheiros;
+      // Nota: mudança de estado/evidências no modal ainda não persiste no Sheets.
+      // O backend actual só faz appendRow; o update por id será feito num próximo endpoint.
+      a.evidenciasText = primeiroLink;
+      a.evidenciasCount = (primeiroLink ? 1 : 0) + ficheiros;
 
       // Remover de qualquer lista e reenfileirar conforme estado
       removeFromAll(a.id);
 
       if (novoEstado === "Executada") state.executadas.unshift(a);
       else if (novoEstado === "Cancelada") state.canceladas.unshift(a);
-      else state.cadastradas.unshift(a); // Planificado/Adiada ficam aqui
+      else state.cadastradas.unshift(a); // Planificada/Adiada ficam aqui
 
       closeModal();
       render();
@@ -421,7 +480,7 @@
         resp:"Coord. de Pesquisa",
         inicio:"2026-03-12",
         fim:"2026-03-12",
-        estado:"Planificado",
+        estado:"Planificada",
         motivo:"",
         evidenciasText:"",
         evidenciasCount:0
@@ -467,5 +526,6 @@
     });
 
     // Start
+    carregarDoBackend().catch(console.error);
     render();
   
