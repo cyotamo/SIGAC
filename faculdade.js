@@ -215,6 +215,11 @@
       const form = e.target;
       const submitButton = form.querySelector('button[type="submit"]');
 
+      if (submitButton) {
+        submitButton.classList.add("is-loading");
+        submitButton.setAttribute("aria-busy", "true");
+      }
+
       const a = {
         id: crypto.randomUUID(),
         num: String(state.cadastradas.length + state.executadas.length + state.canceladas.length + 1),
@@ -259,7 +264,11 @@
         state.cadastradas = state.cadastradas.filter(x => x.id !== a.id);
         alert("Erro ao gravar: " + (err?.message || "erro inesperado"));
       } finally {
-        if (submitButton) submitButton.disabled = false;
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.classList.remove("is-loading");
+          submitButton.removeAttribute("aria-busy");
+        }
       }
     });
 
