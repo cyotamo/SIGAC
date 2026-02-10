@@ -289,6 +289,31 @@ body{
     }
     body.faculdade-page .btn:hover{ filter:brightness(1.02); }
     body.faculdade-page .btn:active{ transform: translateY(1px); }
+    body.faculdade-page .btn .btn-label{ display:inline-block; }
+    body.faculdade-page .btn .btn-spinner{
+      display:none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.45);
+      border-top-color: #fff;
+      animation: faculdade-spin .8s linear infinite;
+      vertical-align: middle;
+    }
+    body.faculdade-page .btn.is-loading{
+      cursor: wait;
+      opacity: .95;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 164px;
+    }
+    body.faculdade-page .btn.is-loading .btn-label{ display:none; }
+    body.faculdade-page .btn.is-loading .btn-spinner{ display:inline-block; }
+
+    @keyframes faculdade-spin {
+      to { transform: rotate(360deg); }
+    }
 
     body.faculdade-page .btn-ghost{
       border:1px solid rgba(219,234,254,.95);
