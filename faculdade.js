@@ -1,4 +1,4 @@
-    const API_URL = "COLOCA_AQUI_O_URL_DO_WEB_APP/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxh13QZ0OfmMWdZHFCDv7KYrfFUb8xKdjLJN2gdzDx53al7Y56NM8K9y8ttoXLsQatb/exec";
 
     // ---------------------------
     // DEMO DATA / STATE
