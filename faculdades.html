@@ -262,25 +262,6 @@
     .pane{ display:none; }
     .pane.active{ display:block; }
 
-    /* Stats */
-    .stats{
-      padding: 14px 16px;
-      display:grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
-      gap: 10px;
-      border-bottom: 1px solid rgba(219,234,254,.95);
-      background: rgba(255,255,255,.6);
-    }
-
-    .stat{
-      background:#fff;
-      border:1px solid rgba(219,234,254,.95);
-      border-radius: 16px;
-      padding: 10px 12px;
-    }
-    .stat .k{ font-size: 12px; color: var(--muted2); font-weight: 800; }
-    .stat .v{ margin-top:4px; font-size: 18px; font-weight: 950; }
-
     /* Table */
     .table-wrap{
       padding: 14px 16px 16px;
@@ -393,7 +374,6 @@
     /* Responsive */
     @media (max-width: 980px){
       .main{ grid-template-columns: 1fr; }
-      .stats{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }
     }
   </style>
 </head>
@@ -436,12 +416,6 @@
           </button>
         </div>
 
-        <div class="stats" aria-label="Indicadores">
-          <div class="stat"><div class="k">Total</div><div class="v" id="sTotal">0</div></div>
-          <div class="stat"><div class="k">Pendentes</div><div class="v" id="sPend">0</div></div>
-          <div class="stat"><div class="k">Executadas</div><div class="v" id="sExec">0</div></div>
-          <div class="stat"><div class="k">Canceladas</div><div class="v" id="sCanc">0</div></div>
-        </div>
 
         <div class="pane active" id="pane-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
           <div class="card-h">
@@ -761,15 +735,6 @@
       if (estado === "Adiada") return `<span class="chip warn">● ${estado}</span>`;
       return `<span class="chip">● ${estado}</span>`;
     }
-
-    function updateStats(){
-      const total = state.cadastradas.length + state.executadas.length + state.canceladas.length;
-      $("#sTotal").textContent = total;
-      $("#sPend").textContent = state.cadastradas.filter(x => x.estado === "Pendente" || x.estado === "Adiada").length;
-      $("#sExec").textContent = state.executadas.length;
-      $("#sCanc").textContent = state.canceladas.length;
-    }
-
     function render(){
       // Cadastradas
       $("#tbCadastradas").innerHTML = state.cadastradas.map(a => `
@@ -835,7 +800,6 @@
         </tr>
       `).join("");
 
-      updateStats();
     }
 
     function escapeHtml(str){
