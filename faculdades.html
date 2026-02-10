@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIGAC — Cadastro de Actividades (Faculdade)</title>
+
+  <style>
+    :root{
+      --bg1:#f6fbff;
+      --bg2:#eef6ff;
+      --card:#ffffff;
+      --line:#dbeafe;
+      --text:#0f172a;
+      --muted:#475569;
+      --muted2:#64748b;
+      --blue:#2b6cb0;
+      --blue2:#1e5aa0;
+      --focus:#60a5fa;
+      --shadow: 0 18px 60px rgba(2, 32, 71, 0.12);
+      --radius: 18px;
+      --radius2: 24px;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 600px at 15% 10%, rgba(96,165,250,.22), transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, rgba(59,130,246,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    .app{
+      min-height:100vh;
+      padding: 18px;
+      display:grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
+    }
+
+    /* Header */
+    .topbar{
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(219,234,254,.95);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius2);
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      backdrop-filter: blur(6px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .logo{
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      color: var(--blue2);
+      background: linear-gradient(135deg, rgba(43,108,176,.16), rgba(96,165,250,.22));
+      border: 1px solid rgba(219,234,254,.95);
+      letter-spacing: .4px;
+      flex:0 0 auto;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand p{
+      margin:3px 0 0;
+      font-size: 12.5px;
+      color: var(--muted2);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      font-size: 12px;
+      font-weight: 800;
+      color: #0b3a77;
+      background: rgba(219,234,254,.85);
+      border: 1px solid rgba(191,219,254,.95);
+      padding: 6px 10px;
+      border-radius: 999px;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+    .dot{ width:8px;height:8px;border-radius:50%; background: var(--blue); box-shadow:0 0 0 4px rgba(96,165,250,.18); }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-weight: 900;
+      font-size: 12.5px;
+      color:#fff;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      box-shadow: 0 12px 26px rgba(30, 90, 160, .18);
+      white-space:nowrap;
+    }
+    .btn:hover{ filter:brightness(1.02); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn-ghost{
+      border:1px solid rgba(219,234,254,.95);
+      background:#fff;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-weight: 900;
+      font-size: 12.5px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn-ghost:hover{ filter:brightness(0.99); }
+    .btn-ghost:active{ transform: translateY(1px); }
+
+    /* Layout main */
+    .main{
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap: 14px;
+      align-items:start;
+    }
+
+    .card{
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(219,234,254,.95);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius2);
+      backdrop-filter: blur(6px);
+      overflow:hidden;
+    }
+
+    .card-h{
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(219,234,254,.95);
+      background: linear-gradient(180deg, #f6fbff, #eef6ff);
+    }
+
+    .card-h h2{ margin:0; font-size: 14px; font-weight: 950; letter-spacing:.2px; }
+    .card-h p{ margin:5px 0 0; font-size: 12.5px; color: var(--muted2); line-height:1.35; }
+
+    .card-b{ padding: 14px 16px 16px; }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(219,234,254,.95);
+      background: rgba(255,255,255,.7);
+      flex-wrap:wrap;
+    }
+    .tab{
+      border:1px solid rgba(219,234,254,.95);
+      background:#fff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+      font-size: 12.5px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .tab[aria-selected="true"]{
+      border-color: rgba(96,165,250,.95);
+      box-shadow: 0 0 0 4px rgba(96,165,250,.18);
+    }
+
+    .badge{
+      background: rgba(219,234,254,.9);
+      border: 1px solid rgba(191,219,254,.95);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      color:#0b3a77;
+    }
+
+    /* Form */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .field{ display:grid; gap:6px; }
+    label{
+      font-size: 12px;
+      color:#334155;
+      font-weight: 900;
+      letter-spacing:.2px;
+    }
+    input, select, textarea{
+      width:100%;
+      border:1px solid rgba(219,234,254,.95);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      outline:none;
+      background: rgba(255,255,255,.96);
+    }
+    textarea{ min-height: 86px; resize: vertical; }
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(96,165,250,.95);
+      box-shadow: 0 0 0 4px rgba(96,165,250,.18);
+    }
+
+    .span2{ grid-column: 1 / -1; }
+
+    .mini{
+      font-size: 12px;
+      color: var(--muted2);
+      line-height:1.35;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+
+    /* Right: content area */
+    .content{ padding: 0; }
+    .pane{ display:none; }
+    .pane.active{ display:block; }
+
+    /* Stats */
+    .stats{
+      padding: 14px 16px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+      border-bottom: 1px solid rgba(219,234,254,.95);
+      background: rgba(255,255,255,.6);
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid rgba(219,234,254,.95);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    .stat .k{ font-size: 12px; color: var(--muted2); font-weight: 800; }
+    .stat .v{ margin-top:4px; font-size: 18px; font-weight: 950; }
+
+    /* Table */
+    .table-wrap{
+      padding: 14px 16px 16px;
+      overflow:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 980px;
+    }
+    th, td{
+      text-align:left;
+      font-size: 12.5px;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(219,234,254,.95);
+      vertical-align: top;
+    }
+    th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f8fbff;
+      font-size: 12px;
+      color:#334155;
+      font-weight: 950;
+      letter-spacing:.2px;
+      border-bottom: 1px solid rgba(191,219,254,.95);
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 950;
+      border: 1px solid rgba(219,234,254,.95);
+      background: rgba(248,250,252,.85);
+      white-space:nowrap;
+    }
+    .chip.ok{ border-color: rgba(22,163,74,.35); background: rgba(22,163,74,.10); color: #166534; }
+    .chip.warn{ border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.12); color: #92400e; }
+    .chip.bad{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); color: #991b1b; }
+
+    .btn-sm{
+      border:1px solid rgba(219,234,254,.95);
+      background:#fff;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-weight: 950;
+      font-size: 12px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn-sm:hover{ filter:brightness(0.99); }
+
+    .muted{ color: var(--muted2); }
+
+    /* Modal */
+    .modal-backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 18, 42, .35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal-backdrop.show{ display:flex; }
+
+    .modal{
+      width: min(860px, 100%);
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(219,234,254,.95);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      overflow:hidden;
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-h{
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(219,234,254,.95);
+      background: linear-gradient(180deg, #f6fbff, #eef6ff);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .modal-h h3{ margin:0; font-size: 14px; font-weight: 950; }
+    .modal-b{ padding: 14px 16px 16px; }
+    .modal .grid{ grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .modal .span2{ grid-column: 1 / -1; }
+
+    .help{
+      font-size: 12px;
+      color: var(--muted2);
+      background: rgba(248,250,252,.75);
+      border: 1px dashed rgba(148,163,184,.45);
+      border-radius: 14px;
+      padding: 10px 12px;
+      line-height:1.4;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .main{ grid-template-columns: 1fr; }
+      .stats{ grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">SIGAC</div>
+        <div style="min-width:0">
+          <h1>Cadastro de Actividades — Módulo da Faculdade</h1>
+          <p id="ctx">Faculdade: <strong>FACEE</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>facee@unirovuma.ac.mz</strong></p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <span class="pill"><span class="dot"></span> Sessão: Faculdade</span>
+        <button class="btn-ghost" id="btnDemo">Carregar demo</button>
+        <button class="btn" id="btnRelatorioTopo">Relatório (Executadas)</button>
+      </div>
+    </header>
+
+    <div class="main">
+      <!-- LEFT: Cadastro -->
+      <aside class="card">
+        <div class="card-h">
+          <h2>Cadastro (Plano)</h2>
+          <p>Registe as actividades do plano anual conforme a grelha. Após gravar, entram em <strong>Actividades Cadastradas</strong>.</p>
+        </div>
+
+        <div class="card-b">
+          <form id="formCadastro">
+            <div class="grid">
+              <div class="field">
+                <label for="num">Nº</label>
+                <input id="num" placeholder="Ex.: 1" inputmode="numeric" required />
+              </div>
+
+              <div class="field">
+                <label for="area">Área</label>
+                <select id="area" required>
+                  <option value="Pós-Graduação">A. Pós-Graduação</option>
+                  <option value="Pesquisa">B. Pesquisa</option>
+                  <option value="Extensão">C. Extensão</option>
+                  <option value="Inovação">D. Inovação</option>
+                  <option value="Publicação">E. Publicação</option>
+                </select>
+              </div>
+
+              <div class="field span2">
+                <label for="accao">Acção</label>
+                <input id="accao" placeholder="Ex.: Seminário, projecto, formação, submissão de artigo, etc." required />
+              </div>
+
+              <div class="field span2">
+                <label for="obj">Objectivo específico</label>
+                <textarea id="obj" placeholder="Descreva o objectivo específico..." required></textarea>
+              </div>
+
+              <div class="field span2">
+                <label for="indicador">Indicador de produto</label>
+                <input id="indicador" placeholder="Ex.: Nº de seminários, Nº de artigos submetidos, Nº de participantes..." required />
+              </div>
+
+              <div class="field">
+                <label for="metaAnual">Meta anual</label>
+                <input id="metaAnual" placeholder="Ex.: 4" />
+              </div>
+
+              <div class="field">
+                <label for="local">Localização</label>
+                <input id="local" placeholder="Ex.: Campus, distrito, província..." />
+              </div>
+
+              <div class="field">
+                <label for="t1">Meta T1</label>
+                <input id="t1" placeholder="I" />
+              </div>
+              <div class="field">
+                <label for="t2">Meta T2</label>
+                <input id="t2" placeholder="II" />
+              </div>
+              <div class="field">
+                <label for="t3">Meta T3</label>
+                <input id="t3" placeholder="III" />
+              </div>
+              <div class="field">
+                <label for="t4">Meta T4</label>
+                <input id="t4" placeholder="IV" />
+              </div>
+
+              <div class="field">
+                <label for="benefTotal">Beneficiários (Total)</label>
+                <input id="benefTotal" inputmode="numeric" placeholder="0" />
+              </div>
+              <div class="field">
+                <label for="benefH">Homens</label>
+                <input id="benefH" inputmode="numeric" placeholder="0" />
+              </div>
+              <div class="field">
+                <label for="benefM">Mulheres</label>
+                <input id="benefM" inputmode="numeric" placeholder="0" />
+              </div>
+              <div class="field">
+                <label for="orcamento">Orçamento (MZN)</label>
+                <input id="orcamento" inputmode="decimal" placeholder="0.00" />
+              </div>
+
+              <div class="field">
+                <label for="fonte">Fonte de financiamento</label>
+                <select id="fonte">
+                  <option value="OE">OE</option>
+                  <option value="Externo">O. Externo</option>
+                  <option value="OE+Externo">OE + O. Externo</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="resp">Responsável</label>
+                <input id="resp" placeholder="Nome do responsável" />
+              </div>
+
+              <div class="field">
+                <label for="inicio">Período de execução (Início)</label>
+                <input id="inicio" type="date" />
+              </div>
+              <div class="field">
+                <label for="fim">Período de execução (Fim)</label>
+                <input id="fim" type="date" />
+              </div>
+
+              <div class="field span2">
+                <label for="nota">Observações (opcional)</label>
+                <textarea id="nota" placeholder="Notas, condições, dependências, etc."></textarea>
+              </div>
+            </div>
+
+            <div class="row">
+              <span class="mini">Ao gravar, a actividade entra como <strong>Pendente</strong> em “Actividades Cadastradas”.</span>
+              <button class="btn" type="submit">Gravar actividade</button>
+            </div>
+          </form>
+        </div>
+      </aside>
+
+      <!-- RIGHT: Tabs + Tables -->
+      <section class="card content">
+        <div class="tabs" role="tablist" aria-label="Abas de gestão">
+          <button class="tab" role="tab" aria-selected="true" data-tab="cadastradas">
+            Actividades Cadastradas <span class="badge" id="bCadastradas">0</span>
+          </button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="executadas">
+            Executadas <span class="badge" id="bExecutadas">0</span>
+          </button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="canceladas">
+            Canceladas <span class="badge" id="bCanceladas">0</span>
+          </button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="relatorio">
+            Relatório (Executadas)
+          </button>
+        </div>
+
+        <div class="stats" aria-label="Indicadores">
+          <div class="stat"><div class="k">Total</div><div class="v" id="sTotal">0</div></div>
+          <div class="stat"><div class="k">Pendentes</div><div class="v" id="sPend">0</div></div>
+          <div class="stat"><div class="k">Executadas</div><div class="v" id="sExec">0</div></div>
+          <div class="stat"><div class="k">Canceladas</div><div class="v" id="sCanc">0</div></div>
+        </div>
+
+        <!-- Pane: Cadastradas -->
+        <div class="pane active" id="pane-cadastradas">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Área</th>
+                  <th>Acção</th>
+                  <th>Período</th>
+                  <th>Orçamento</th>
+                  <th>Fonte</th>
+                  <th>Estado</th>
+                  <th>Evidências</th>
+                  <th>Acções</th>
+                </tr>
+              </thead>
+              <tbody id="tbCadastradas"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pane: Executadas -->
+        <div class="pane" id="pane-executadas">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Área</th>
+                  <th>Acção</th>
+                  <th>Período</th>
+                  <th>Responsável</th>
+                  <th>Evidências</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbExecutadas"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pane: Canceladas -->
+        <div class="pane" id="pane-canceladas">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Área</th>
+                  <th>Acção</th>
+                  <th>Período</th>
+                  <th>Motivo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbCanceladas"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pane: Relatório -->
+        <div class="pane" id="pane-relatorio">
+          <div class="card-b">
+            <div class="help">
+              Aqui vais gerar o <strong>relatório das actividades executadas</strong>. Nesta versão (demo), é gerado um relatório em HTML pronto para imprimir/guardar em PDF.
+            </div>
+
+            <div class="row" style="margin-top:12px">
+              <div class="mini">Inclui: nº, área, acção, período, responsável, orçamento e evidências.</div>
+              <button class="btn" id="btnGerarRelatorio">Gerar relatório</button>
+            </div>
+
+            <div style="margin-top:12px" class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nº</th>
+                    <th>Área</th>
+                    <th>Acção</th>
+                    <th>Período</th>
+                    <th>Responsável</th>
+                    <th>Orçamento</th>
+                    <th>Evidências</th>
+                  </tr>
+                </thead>
+                <tbody id="tbRelatorio"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- MODAL: Editar/Estado/Evidências -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Editar actividade">
+      <div class="modal-h">
+        <h3>Actualizar actividade</h3>
+        <button class="btn-ghost" id="btnFechar">Fechar</button>
+      </div>
+
+      <div class="modal-b">
+        <div class="grid">
+          <div class="field span2">
+            <label>Acção</label>
+            <input id="mAccao" />
+          </div>
+
+          <div class="field">
+            <label>Início</label>
+            <input id="mInicio" type="date" />
+          </div>
+          <div class="field">
+            <label>Fim</label>
+            <input id="mFim" type="date" />
+          </div>
+
+          <div class="field">
+            <label>Estado</label>
+            <select id="mEstado">
+              <option value="Pendente">Pendente</option>
+              <option value="Adiada">Adiada</option>
+              <option value="Executada">Executada</option>
+              <option value="Cancelada">Cancelada</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Responsável</label>
+            <input id="mResp" />
+          </div>
+
+          <div class="field span2">
+            <label>Motivo (se adiada/cancelada)</label>
+            <textarea id="mMotivo" placeholder="Explique o motivo..."></textarea>
+          </div>
+
+          <div class="field span2">
+            <label>Evidências (links)</label>
+            <input id="mLinks" placeholder="Cole links separados por vírgula (Drive, fotos, relatórios, etc.)" />
+          </div>
+
+          <div class="field span2">
+            <label>Evidências (ficheiros)</label>
+            <input id="mFicheiros" type="file" multiple />
+            <div class="mini">Nesta demo, os ficheiros não são carregados; fica apenas registado “X ficheiros seleccionados”.</div>
+          </div>
+
+          <div class="field span2">
+            <div class="help">
+              <strong>Regras:</strong> Se marcar <strong>Executada</strong>, a actividade passa para “Executadas”.
+              Se marcar <strong>Cancelada</strong>, passa para “Canceladas”. Se marcar <strong>Adiada</strong>, mantém-se nas cadastradas com motivo.
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="mini" id="mInfo"></span>
+          <button class="btn" id="btnGuardarModal">Guardar alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------
+    // DEMO DATA / STATE
+    // ---------------------------
+    const state = {
+      cadastradas: [],
+      executadas: [],
+      canceladas: [],
+      currentEdit: null
+    };
+
+    const $ = (s) => document.querySelector(s);
+    const fmtMoney = (v) => {
+      const n = Number(String(v || "0").replace(",", "."));
+      if (Number.isNaN(n)) return "—";
+      return n.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " MZN";
+    };
+
+    const fmtPeriodo = (ini, fim) => {
+      if (!ini && !fim) return "—";
+      const a = ini ? new Date(ini).toLocaleDateString("pt-PT") : "—";
+      const b = fim ? new Date(fim).toLocaleDateString("pt-PT") : "—";
+      return `${a} → ${b}`;
+    };
+
+    function chipEstado(estado){
+      if (estado === "Executada") return `<span class="chip ok">● ${estado}</span>`;
+      if (estado === "Cancelada") return `<span class="chip bad">● ${estado}</span>`;
+      if (estado === "Adiada") return `<span class="chip warn">● ${estado}</span>`;
+      return `<span class="chip">● ${estado}</span>`;
+    }
+
+    function updateBadges(){
+      $("#bCadastradas").textContent = state.cadastradas.length;
+      $("#bExecutadas").textContent = state.executadas.length;
+      $("#bCanceladas").textContent = state.canceladas.length;
+
+      const total = state.cadastradas.length + state.executadas.length + state.canceladas.length;
+      $("#sTotal").textContent = total;
+      $("#sPend").textContent = state.cadastradas.filter(x => x.estado === "Pendente" || x.estado === "Adiada").length;
+      $("#sExec").textContent = state.executadas.length;
+      $("#sCanc").textContent = state.canceladas.length;
+    }
+
+    function render(){
+      // Cadastradas
+      $("#tbCadastradas").innerHTML = state.cadastradas.map(a => `
+        <tr>
+          <td><strong>${a.num}</strong></td>
+          <td>${a.area}</td>
+          <td>
+            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
+            <div class="muted">${escapeHtml(a.indicador || "")}</div>
+          </td>
+          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td>${fmtMoney(a.orcamento)}</td>
+          <td>${a.fonte || "—"}</td>
+          <td>${chipEstado(a.estado)}</td>
+          <td>${(a.evidenciasCount || 0) > 0 ? `<span class="chip ok">📎 ${a.evidenciasCount}</span>` : `<span class="chip">—</span>`}</td>
+          <td>
+            <button class="btn-sm" onclick="openModal('${a.id}')">Editar / Estado</button>
+          </td>
+        </tr>
+      `).join("");
+
+      // Executadas
+      $("#tbExecutadas").innerHTML = state.executadas.map(a => `
+        <tr>
+          <td><strong>${a.num}</strong></td>
+          <td>${a.area}</td>
+          <td>
+            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
+            <div class="muted">${escapeHtml(a.obj || "")}</div>
+          </td>
+          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td>${escapeHtml(a.resp || "—")}</td>
+          <td>${(a.evidenciasCount || 0) > 0 ? `<span class="chip ok">📎 ${a.evidenciasCount}</span>` : `<span class="chip">—</span>`}</td>
+          <td>${chipEstado("Executada")}</td>
+        </tr>
+      `).join("");
+
+      // Canceladas
+      $("#tbCanceladas").innerHTML = state.canceladas.map(a => `
+        <tr>
+          <td><strong>${a.num}</strong></td>
+          <td>${a.area}</td>
+          <td>
+            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
+            <div class="muted">${escapeHtml(a.indicador || "")}</div>
+          </td>
+          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td>${escapeHtml(a.motivo || "—")}</td>
+          <td>${chipEstado("Cancelada")}</td>
+        </tr>
+      `).join("");
+
+      // Relatório (executadas)
+      $("#tbRelatorio").innerHTML = state.executadas.map(a => `
+        <tr>
+          <td><strong>${a.num}</strong></td>
+          <td>${a.area}</td>
+          <td>${escapeHtml(a.accao)}</td>
+          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td>${escapeHtml(a.resp || "—")}</td>
+          <td>${fmtMoney(a.orcamento)}</td>
+          <td>${(a.evidenciasText || "").trim() ? escapeHtml(a.evidenciasText) : ((a.evidenciasCount||0) ? `${a.evidenciasCount} ficheiro(s)` : "—")}</td>
+        </tr>
+      `).join("");
+
+      updateBadges();
+    }
+
+    function escapeHtml(str){
+      return String(str || "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // ---------------------------
+    // Tabs
+    // ---------------------------
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
+        btn.setAttribute("aria-selected", "true");
+
+        const tab = btn.dataset.tab;
+        document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
+        $("#pane-" + tab).classList.add("active");
+      });
+    });
+
+    $("#btnRelatorioTopo").addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
+      document.querySelector('.tab[data-tab="relatorio"]').setAttribute("aria-selected", "true");
+      document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
+      $("#pane-relatorio").classList.add("active");
+    });
+
+    // ---------------------------
+    // Cadastro
+    // ---------------------------
+    $("#formCadastro").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const a = {
+        id: crypto.randomUUID(),
+        num: $("#num").value.trim(),
+        area: $("#area").value,
+        accao: $("#accao").value.trim(),
+        obj: $("#obj").value.trim(),
+        indicador: $("#indicador").value.trim(),
+        metaAnual: $("#metaAnual").value.trim(),
+        metas: { t1: $("#t1").value.trim(), t2: $("#t2").value.trim(), t3: $("#t3").value.trim(), t4: $("#t4").value.trim() },
+        local: $("#local").value.trim(),
+        benef: { total: $("#benefTotal").value.trim(), h: $("#benefH").value.trim(), m: $("#benefM").value.trim() },
+        orcamento: $("#orcamento").value.trim(),
+        fonte: $("#fonte").value,
+        resp: $("#resp").value.trim(),
+        inicio: $("#inicio").value,
+        fim: $("#fim").value,
+        nota: $("#nota").value.trim(),
+        estado: "Pendente",
+        motivo: "",
+        evidenciasText: "",
+        evidenciasCount: 0,
+        createdAt: new Date().toISOString()
+      };
+
+      state.cadastradas.unshift(a);
+      e.target.reset();
+      $("#area").value = "Pós-Graduação";
+      $("#fonte").value = "OE";
+
+      // Ir para tab "cadastradas"
+      document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
+      document.querySelector('.tab[data-tab="cadastradas"]').setAttribute("aria-selected", "true");
+      document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
+      $("#pane-cadastradas").classList.add("active");
+
+      render();
+    });
+
+    // ---------------------------
+    // Modal open/close
+    // ---------------------------
+    window.openModal = (id) => {
+      const a = state.cadastradas.find(x => x.id === id) || state.executadas.find(x => x.id === id) || state.canceladas.find(x => x.id === id);
+      if (!a) return;
+
+      state.currentEdit = a;
+
+      $("#mAccao").value = a.accao || "";
+      $("#mInicio").value = a.inicio || "";
+      $("#mFim").value = a.fim || "";
+      $("#mEstado").value = a.estado || "Pendente";
+      $("#mResp").value = a.resp || "";
+      $("#mMotivo").value = a.motivo || "";
+      $("#mLinks").value = a.evidenciasText || "";
+      $("#mFicheiros").value = "";
+      $("#mInfo").textContent = `Actividade #${a.num} • ${a.area}`;
+
+      $("#modalBackdrop").classList.add("show");
+      $("#modalBackdrop").setAttribute("aria-hidden", "false");
+      setTimeout(()=> $("#mAccao").focus(), 50);
+    };
+
+    function closeModal(){
+      $("#modalBackdrop").classList.remove("show");
+      $("#modalBackdrop").setAttribute("aria-hidden", "true");
+      state.currentEdit = null;
+    }
+    $("#btnFechar").addEventListener("click", closeModal);
+    $("#modalBackdrop").addEventListener("click", (e) => { if (e.target.id === "modalBackdrop") closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+    // ---------------------------
+    // Modal save: move items between tabs
+    // ---------------------------
+    $("#btnGuardarModal").addEventListener("click", () => {
+      const a = state.currentEdit;
+      if (!a) return;
+
+      const novoEstado = $("#mEstado").value;
+      const links = $("#mLinks").value.trim();
+      const ficheiros = $("#mFicheiros").files?.length || 0;
+
+      a.accao = $("#mAccao").value.trim();
+      a.inicio = $("#mInicio").value;
+      a.fim = $("#mFim").value;
+      a.resp = $("#mResp").value.trim();
+      a.estado = novoEstado;
+      a.motivo = $("#mMotivo").value.trim();
+      a.evidenciasText = links;
+      a.evidenciasCount = (links ? links.split(",").map(s=>s.trim()).filter(Boolean).length : 0) + ficheiros;
+
+      // Remover de qualquer lista e reenfileirar conforme estado
+      removeFromAll(a.id);
+
+      if (novoEstado === "Executada") state.executadas.unshift(a);
+      else if (novoEstado === "Cancelada") state.canceladas.unshift(a);
+      else state.cadastradas.unshift(a); // Pendente/Adiada ficam aqui
+
+      closeModal();
+      render();
+    });
+
+    function removeFromAll(id){
+      state.cadastradas = state.cadastradas.filter(x => x.id !== id);
+      state.executadas = state.executadas.filter(x => x.id !== id);
+      state.canceladas = state.canceladas.filter(x => x.id !== id);
+    }
+
+    // ---------------------------
+    // Relatório: imprimir HTML
+    // ---------------------------
+    $("#btnGerarRelatorio").addEventListener("click", () => gerarRelatorioImprimivel());
+    $("#btnRelatorioTopo").addEventListener("dblclick", () => gerarRelatorioImprimivel());
+
+    function gerarRelatorioImprimivel(){
+      const rows = state.executadas.map(a => `
+        <tr>
+          <td>${escapeHtml(a.num)}</td>
+          <td>${escapeHtml(a.area)}</td>
+          <td>${escapeHtml(a.accao)}</td>
+          <td>${escapeHtml(fmtPeriodo(a.inicio, a.fim))}</td>
+          <td>${escapeHtml(a.resp || "—")}</td>
+          <td>${escapeHtml(fmtMoney(a.orcamento))}</td>
+          <td>${escapeHtml((a.evidenciasText || "").trim() || ((a.evidenciasCount||0) ? (a.evidenciasCount + " evidência(s)") : "—"))}</td>
+        </tr>
+      `).join("");
+
+      const w = window.open("", "_blank");
+      w.document.write(`
+        <!doctype html>
+        <html lang="pt-PT">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Relatório — Actividades Executadas (SIGAC)</title>
+          <style>
+            body{ font-family: Arial, sans-serif; margin: 24px; color:#111827; }
+            h1{ font-size: 16px; margin:0; }
+            h2{ font-size: 13px; font-weight: normal; margin:6px 0 18px; color:#374151; }
+            table{ width:100%; border-collapse: collapse; }
+            th, td{ border:1px solid #d1d5db; padding:8px; font-size: 12px; vertical-align: top; }
+            th{ background:#f3f4f6; text-align:left; }
+            .meta{ margin: 10px 0 14px; font-size: 12px; color:#374151; }
+            .foot{ margin-top: 12px; font-size: 11px; color:#6b7280; }
+            @media print { button{ display:none; } }
+          </style>
+        </head>
+        <body>
+          <h1>Universidade Rovuma — Direcção Científica</h1>
+          <h2>Relatório de Actividades Executadas (SIGAC) • Faculdade: FACEE • Ano lectivo: 2026</h2>
+          <div class="meta">Total de actividades executadas: <strong>${state.executadas.length}</strong></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Nº</th><th>Área</th><th>Acção</th><th>Período</th><th>Responsável</th><th>Orçamento</th><th>Evidências</th>
+              </tr>
+            </thead>
+            <tbody>${rows || `<tr><td colspan="7">Sem registos de actividades executadas.</td></tr>`}</tbody>
+          </table>
+          <div class="foot">Gerado pelo SIGAC (demo). Para exportar em PDF, use “Imprimir” do navegador.</div>
+          <button onclick="window.print()">Imprimir / Guardar em PDF</button>
+        </body>
+        </html>
+      `);
+      w.document.close();
+    }
+
+    // ---------------------------
+    // Demo
+    // ---------------------------
+    $("#btnDemo").addEventListener("click", () => {
+      state.cadastradas = [];
+      state.executadas = [];
+      state.canceladas = [];
+
+      state.cadastradas.push({
+        id: crypto.randomUUID(),
+        num:"1",
+        area:"Pesquisa",
+        accao:"Seminário sobre Governação Electrónica",
+        obj:"Divulgar resultados de pesquisa e promover debate académico.",
+        indicador:"1 seminário realizado",
+        orcamento:"15000",
+        fonte:"OE",
+        resp:"Coord. de Pesquisa",
+        inicio:"2026-03-12",
+        fim:"2026-03-12",
+        estado:"Pendente",
+        motivo:"",
+        evidenciasText:"",
+        evidenciasCount:0
+      });
+
+      state.executadas.push({
+        id: crypto.randomUUID(),
+        num:"2",
+        area:"Extensão",
+        accao:"Campanha de literacia financeira comunitária",
+        obj:"Capacitar jovens e microempreendedores em finanças básicas.",
+        indicador:"200 beneficiários",
+        orcamento:"30000",
+        fonte:"Externo",
+        resp:"Coord. de Extensão",
+        inicio:"2026-05-01",
+        fim:"2026-05-30",
+        estado:"Executada",
+        motivo:"",
+        evidenciasText:"https://drive.google.com/..., https://photos.google.com/...",
+        evidenciasCount:2
+      });
+
+      state.canceladas.push({
+        id: crypto.randomUUID(),
+        num:"3",
+        area:"Publicação",
+        accao:"Submissão de artigo a revista indexada",
+        obj:"Publicar resultados de investigação.",
+        indicador:"1 artigo submetido",
+        orcamento:"0",
+        fonte:"OE",
+        resp:"Equipa de Investigação",
+        inicio:"2026-07-01",
+        fim:"2026-09-30",
+        estado:"Cancelada",
+        motivo:"Falta de dados completos para submissão.",
+        evidenciasText:"",
+        evidenciasCount:0
+      });
+
+      render();
+    });
+
+    // Start
+    render();
+  </script>
+</body>
+</html>
