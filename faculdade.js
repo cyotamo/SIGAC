@@ -164,7 +164,6 @@
           <td>${fmtMoney(a.orcamento)}</td>
           <td>${a.fonte || "—"}</td>
           <td>${chipEstado(a.estado)}</td>
-          <td>${(a.evidenciasCount || 0) > 0 ? `<span class="chip ok">📎 ${a.evidenciasCount}</span>` : `<span class="chip">—</span>`}</td>
           <td>
             <button class="btn-sm" onclick="openModal('${a.id}')">Editar / Estado</button>
           </td>
