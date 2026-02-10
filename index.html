@@ -1,43 +1,46 @@
- <!doctype html>
+<!doctype html>
 <html lang="pt-PT">
 <head>
-  <meta charset="utf-8">
-  <title>SIGAC | Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Universidade Rovuma | SIGAC</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
+  <main class="page">
+    <section class="card" aria-label="Login SIGAC">
 
-  <div class="login-wrapper">
-    <div class="login-box">
+      <header class="brand">
+        <div class="logo" aria-hidden="true">SIGAC</div>
+        <div class="brand-text">
+          <h1>Universidade Rovuma</h1>
+          <p class="dept">Direcção Científica</p>
+          <p class="sys">Sistema de Gestão de Actividades Científicas (SIGAC)</p>
+        </div>
+      </header>
 
-      <h1>Universidade Rovuma</h1>
-      <h2>Direcção Científica</h2>
-      <h3>Sistema de Gestão de Actividades Científicas (SIGAC)</h3>
+      <p class="hint">Autentique-se para aceder ao sistema</p>
 
-      <p class="login-info">Autentique-se para aceder ao sistema</p>
+      <form class="form" autocomplete="on">
+        <label class="field">
+          <span>E-mail</span>
+          <input id="email" type="email" placeholder="ex.: gestor@unirovuma.ac.mz" required />
+        </label>
 
-      <form>
-        <input
-          type="email"
-          id="email"
-          placeholder="Email"
-          autofocus
-          required
-        >
+        <label class="field">
+          <span>Palavra-passe</span>
+          <input id="senha" type="password" placeholder="Introduza a palavra-passe" required />
+        </label>
 
-        <input
-          type="password"
-          placeholder="Password"
-          required
-        >
-
-        <button type="submit">ENTRAR</button>
+        <button class="btn" type="submit">ENTRAR</button>
       </form>
 
-    </div>
-  </div>
+      <footer class="footer">
+        <span>© <span id="ano"></span> Universidade Rovuma</span>
+      </footer>
+    </section>
+  </main>
 
   <script src="login.js"></script>
 </body>
