@@ -313,6 +313,8 @@ body{
     }
 
     body.faculdade-page .card{
+      width: 100%;
+      max-width: none;
       background: rgba(255,255,255,.92);
       border: 1px solid rgba(219,234,254,.95);
       box-shadow: var(--shadow);
