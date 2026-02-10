@@ -1,5 +1,8 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxh13QZ0OfmMWdZHFCDv7KYrfFUb8xKdjLJN2gdzDx53al7Y56NM8K9y8ttoXLsQatb/exec";
 
+    let CACHE = [];
+    let planificadasVisiveis = [];
+
     // ---------------------------
     // DEMO DATA / STATE
     function normalizarParaAPI(a) {
@@ -53,6 +56,88 @@
       return data;
     }
 
+    function normalize(s){
+      return String(s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .trim();
+    }
+
+    function filtrarPlanificadas(dados){
+      return (dados || []).filter((item) => {
+        const estadoNorm = normalize(item?.estado);
+        return estadoNorm === "" || estadoNorm === "planificada" || estadoNorm === "planeada" || estadoNorm === "pendente";
+      });
+    }
+
+    async function carregarTudoDoBack(){
+      const tbody = document.querySelector("#tbodyTabela");
+
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+
+        if (!json || json.sucesso !== true || !Array.isArray(json.dados)) {
+          console.error("Resposta inválida do backend:", json);
+          if (tbody) tbody.innerHTML = '<tr><td colspan="9">Erro ao carregar dados do servidor.</td></tr>';
+          return [];
+        }
+
+        CACHE = json.dados;
+        return CACHE;
+      } catch (err) {
+        console.error("Erro ao carregar do backend:", err);
+        if (tbody) tbody.innerHTML = '<tr><td colspan="9">Erro de ligação ao carregar dados.</td></tr>';
+        return [];
+      }
+    }
+
+    function fmtPeriodoBack(inicio, fim){
+      const ini = String(inicio || "").trim();
+      const end = String(fim || "").trim();
+      if (ini && end) return `${escapeHtml(ini)} — ${escapeHtml(end)}`;
+      if (ini) return escapeHtml(ini);
+      if (end) return escapeHtml(end);
+      return "—";
+    }
+
+    function fmtMoneyBack(v){
+      const raw = String(v ?? "").replace(/\s+/g, "").replace(".", "").replace(",", ".").trim();
+      if (!raw) return "—";
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return "—";
+      return `${n.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MZN`;
+    }
+
+    function renderTabela(dados){
+      const tbody = document.querySelector("#tbodyTabela");
+      if (!tbody) return;
+
+      if (!dados || !dados.length) {
+        tbody.innerHTML = '<tr><td colspan="9">Sem actividades planificadas.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = dados.map((item, index) => `
+        <tr>
+          <td><strong>${index + 1}</strong></td>
+          <td>${escapeHtml(item?.area || "—")}</td>
+          <td>${escapeHtml(item?.acao || "—")}</td>
+          <td>${fmtPeriodoBack(item?.periodoInicio, item?.periodoFim)}</td>
+          <td>${fmtMoneyBack(item?.orcamentoMZN)}</td>
+          <td>${escapeHtml(item?.fonteFin || "—")}</td>
+          <td>${chipEstado(item?.estado || "Planificada")}</td>
+          <td>—</td>
+          <td>
+            <button class="btn-sm" type="button">Editar</button>
+            <button class="btn-sm" type="button">Executar</button>
+            <button class="btn-sm" type="button">Cancelar</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
     // ---------------------------
     const state = {
       cadastradas: [],
@@ -87,25 +172,8 @@
       return `<span class="chip">● ${estado}</span>`;
     }
     function render(){
-      // Cadastradas
-      $("#tbCadastradas").innerHTML = state.cadastradas.map(a => `
-        <tr>
-          <td><strong>${a.num}</strong></td>
-          <td>${a.area}</td>
-          <td>
-            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
-            <div class="muted">${escapeHtml(a.indicador || "")}</div>
-          </td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
-          <td>${fmtMoney(a.orcamento)}</td>
-          <td>${a.fonte || "—"}</td>
-          <td>${chipEstado(a.estado)}</td>
-          <td>${(a.evidenciasCount || 0) > 0 ? `<span class="chip ok">📎 ${a.evidenciasCount}</span>` : `<span class="chip">—</span>`}</td>
-          <td>
-            <button class="btn-sm" onclick="openModal('${a.id}')">Editar / Estado</button>
-          </td>
-        </tr>
-      `).join("");
+      // Planificadas (via backend/cached)
+      renderTabela(planificadasVisiveis);
 
       // Executadas
       $("#tbExecutadas").innerHTML = state.executadas.map(a => `
@@ -182,9 +250,28 @@
       btn.addEventListener("click", () => switchTab(btn.dataset.tab));
     });
 
+    const tabPlanificadas = document.querySelector("#tabPlanificadas") || document.querySelector('[data-tab="cadastradas"]');
+    if (tabPlanificadas) {
+      tabPlanificadas.addEventListener("click", async () => {
+        if (!CACHE.length) await carregarTudoDoBack();
+        planificadasVisiveis = filtrarPlanificadas(CACHE);
+        renderTabela(planificadasVisiveis);
+      });
+    }
+
     $("#btnRelatorioTopo").addEventListener("click", () => switchTab("relatorio"));
 
     switchTab("cadastro");
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await carregarTudoDoBack();
+      const dadosPlanificadas = filtrarPlanificadas(CACHE);
+      planificadasVisiveis = dadosPlanificadas;
+      renderTabela(dadosPlanificadas);
+      console.log("Total do back:", CACHE.length);
+      console.log("Total planificadas:", dadosPlanificadas.length);
+      console.log("Exemplo de estado:", CACHE[0]?.estado);
+    });
 
     function updateMetaAnual(){
       const total = ["#t1", "#t2", "#t3", "#t4"]
