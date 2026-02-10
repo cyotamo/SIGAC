@@ -237,7 +237,7 @@
         inicio: $("#inicio").value,
         fim: $("#fim").value,
         nota: $("#nota").value.trim(),
-        estado: "Pendente",
+        estado: "Planificado",
         motivo: "",
         evidenciasText: "",
         evidenciasCount: 0,
@@ -284,7 +284,7 @@
       $("#mAccao").value = a.accao || "";
       $("#mInicio").value = a.inicio || "";
       $("#mFim").value = a.fim || "";
-      $("#mEstado").value = a.estado || "Pendente";
+      $("#mEstado").value = a.estado || "Planificado";
       $("#mResp").value = a.resp || "";
       $("#mMotivo").value = a.motivo || "";
       $("#mLinks").value = a.evidenciasText || "";
@@ -330,7 +330,7 @@
 
       if (novoEstado === "Executada") state.executadas.unshift(a);
       else if (novoEstado === "Cancelada") state.canceladas.unshift(a);
-      else state.cadastradas.unshift(a); // Pendente/Adiada ficam aqui
+      else state.cadastradas.unshift(a); // Planificado/Adiada ficam aqui
 
       closeModal();
       render();
@@ -421,7 +421,7 @@
         resp:"Coord. de Pesquisa",
         inicio:"2026-03-12",
         fim:"2026-03-12",
-        estado:"Pendente",
+        estado:"Planificado",
         motivo:"",
         evidenciasText:"",
         evidenciasCount:0
