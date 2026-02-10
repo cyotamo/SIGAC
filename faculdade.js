@@ -33,17 +33,21 @@
     }
 
     async function enviarParaBackend(a) {
+      const payload = normalizarParaAPI(a);
+      console.log("PAYLOAD ->", payload);
+
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(normalizarParaAPI(a))
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data || data.sucesso !== true) {
-        const msg = (data && (data.mensagem || data.erros?.join(", "))) || `Falha no envio (HTTP ${res.status})`;
-        throw new Error(msg);
+        console.log("RESPOSTA API ->", data);
+        const detalhes = (data && (data.erros ? data.erros.join(" | ") : data.mensagem)) || `HTTP ${res.status}`;
+        throw new Error(detalhes);
       }
 
       return data;
