@@ -569,3 +569,161 @@ body{
       body.faculdade-page .cols-3{ grid-template-columns: 1fr; }
     }
   
+
+/* Página do gestor */
+body.gestor-page {
+  --line: #dbeafe;
+  --muted: #64748b;
+}
+
+body.gestor-page .gestor-app {
+  min-height: 100vh;
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+body.gestor-page .gestor-topbar {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--shadow);
+}
+
+body.gestor-page .gestor-kicker {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+body.gestor-page .gestor-topbar h1 {
+  margin: 2px 0;
+  font-size: 24px;
+}
+
+body.gestor-page .gestor-sub {
+  margin: 0;
+  color: var(--muted);
+}
+
+body.gestor-page .gestor-pill {
+  border-radius: 999px;
+  border: 1px solid #c7ddff;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #eff6ff;
+}
+
+body.gestor-page .gestor-layout {
+  display: grid;
+  gap: 14px;
+}
+
+body.gestor-page .gestor-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 35px rgba(2, 32, 71, 0.08);
+}
+
+body.gestor-page .gestor-card-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+body.gestor-page .gestor-card-head p {
+  margin: 4px 0 14px;
+  color: var(--muted);
+}
+
+body.gestor-page .gestor-filter-row {
+  display: grid;
+  gap: 7px;
+}
+
+body.gestor-page .gestor-filter-row label {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+body.gestor-page .gestor-filter-row select {
+  width: min(300px, 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+body.gestor-page .gestor-stats {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+body.gestor-page .stat-card {
+  border-radius: 14px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  padding: 12px;
+}
+
+body.gestor-page .stat-card.ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+body.gestor-page .stat-card.bad {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+body.gestor-page .stat-card h3 {
+  margin: 0;
+  color: #334155;
+  font-size: 14px;
+}
+
+body.gestor-page .stat-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 28px;
+}
+
+body.gestor-page .table-wrap {
+  overflow-x: auto;
+}
+
+body.gestor-page .empty-cell {
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+}
+
+body.gestor-page .gestor-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+body.gestor-page .gestor-report-output {
+  margin-top: 12px;
+  border-radius: 14px;
+  border: 1px solid #bfdbfe;
+  background: #f8fbff;
+  min-height: 150px;
+  padding: 12px;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12.5px;
+}

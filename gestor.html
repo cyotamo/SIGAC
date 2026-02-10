@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIGAC — Monitoria da Direcção Científica</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="gestor-page">
+  <div class="gestor-app">
+    <header class="gestor-topbar">
+      <div>
+        <p class="gestor-kicker">Universidade Rovuma</p>
+        <h1>Monitoria de Actividades das Faculdades</h1>
+        <p class="gestor-sub">Direcção Científica — acompanhamento do plano, execução e cancelamento.</p>
+      </div>
+      <span class="gestor-pill">Sessão: Gestor Científico</span>
+    </header>
+
+    <main class="gestor-layout">
+      <section class="gestor-card">
+        <div class="gestor-card-head">
+          <h2>Filtro da Faculdade</h2>
+          <p>Seleccione a faculdade para visualizar as actividades monitoradas.</p>
+        </div>
+        <div class="gestor-filter-row">
+          <label for="faculdadeSelect">Faculdade</label>
+          <select id="faculdadeSelect">
+            <option value="">Escolha a faculdade...</option>
+          </select>
+        </div>
+
+        <div class="gestor-stats" aria-live="polite">
+          <article class="stat-card">
+            <h3>Planificadas</h3>
+            <strong id="totalPlanificadas">0</strong>
+          </article>
+          <article class="stat-card ok">
+            <h3>Executadas</h3>
+            <strong id="totalExecutadas">0</strong>
+          </article>
+          <article class="stat-card bad">
+            <h3>Canceladas</h3>
+            <strong id="totalCanceladas">0</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="gestor-card">
+        <div class="gestor-card-head">
+          <h2>Actividades da Faculdade</h2>
+          <p id="gestorResumo">Sem faculdade seleccionada.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Actividade</th>
+                <th>Estado</th>
+                <th>Período</th>
+                <th>Responsável</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaGestorActividades">
+              <tr>
+                <td colspan="5" class="empty-cell">Seleccione uma faculdade para iniciar a monitoria.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="gestor-card">
+        <div class="gestor-card-head">
+          <h2>Gerar Relatórios</h2>
+          <p>Emita relatórios resumidos conforme o estado das actividades.</p>
+        </div>
+
+        <div class="gestor-report-actions">
+          <button id="btnRelatorioGeral" class="btn">Relatório Geral</button>
+          <button id="btnRelatorioPlanificadas" class="btn-ghost">Relatório Planificadas</button>
+          <button id="btnRelatorioExecutadas" class="btn-ghost">Relatório Executadas</button>
+          <button id="btnRelatorioCanceladas" class="btn-ghost">Relatório Canceladas</button>
+        </div>
+
+        <pre id="relatorioSaida" class="gestor-report-output">Selecione uma faculdade e clique num botão para gerar o relatório.</pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="gestor.js"></script>
+</body>
+</html>
