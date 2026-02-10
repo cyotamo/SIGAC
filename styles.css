@@ -442,6 +442,19 @@ body{
       margin-top: 10px;
     }
 
+    body.faculdade-page .inline-feedback{
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--blue);
+      min-height: 20px;
+      margin-left: 4px;
+      flex: 1;
+    }
+
+    body.faculdade-page .inline-feedback.is-error{
+      color: #b91c1c;
+    }
+
     /* Right: content area */
     body.faculdade-page .content{ padding: 0; }
     body.faculdade-page .pane{ display:none; }

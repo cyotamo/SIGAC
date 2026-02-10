@@ -316,6 +316,12 @@
       e.preventDefault();
       const form = e.target;
       const submitButton = form.querySelector('button[type="submit"]');
+      const cadastroFeedback = $("#cadastroFeedback");
+
+      if (cadastroFeedback) {
+        cadastroFeedback.textContent = "";
+        cadastroFeedback.classList.remove("is-error");
+      }
 
       if (submitButton) {
         submitButton.classList.add("is-loading");
@@ -359,11 +365,17 @@
         updateBeneficiariosTotal();
 
         switchTab("cadastradas");
-        alert("Gravado com sucesso");
+        if (cadastroFeedback) {
+          cadastroFeedback.textContent = "Dados enviados com sucesso!";
+          cadastroFeedback.classList.remove("is-error");
+        }
       } catch (err) {
         console.error(err);
         state.cadastradas = state.cadastradas.filter(x => x.id !== a.id);
-        alert("Erro ao gravar: " + (err?.message || "erro inesperado"));
+        if (cadastroFeedback) {
+          cadastroFeedback.textContent = "Erro ao gravar: " + (err?.message || "erro inesperado");
+          cadastroFeedback.classList.add("is-error");
+        }
       } finally {
         if (submitButton) {
           submitButton.disabled = false;
