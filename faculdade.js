@@ -1,5 +1,54 @@
+    const API_URL = "COLOCA_AQUI_O_URL_DO_WEB_APP/exec";
+
     // ---------------------------
     // DEMO DATA / STATE
+    function normalizarParaAPI(a) {
+      return {
+        id: a.id,
+        dataRegisto: a.createdAt || "",
+        area: a.area,
+        acao: a.accao,
+        objectivos: a.obj,
+        localizacao: a.local,
+        indicador: a.indicador,
+
+        metaAnual: a.metaAnual,
+        metaT1: a.metas?.t1 ?? "",
+        metaT2: a.metas?.t2 ?? "",
+        metaT3: a.metas?.t3 ?? "",
+        metaT4: a.metas?.t4 ?? "",
+
+        benefTotal: a.benef?.total ?? "",
+        homens: a.benef?.h ?? "",
+        mulheres: a.benef?.m ?? "",
+
+        fonteFin: a.fonte,
+        orcamentoMZN: a.orcamento,
+        responsavel: a.resp,
+        periodoInicio: a.inicio,
+        periodoFim: a.fim,
+        observacoes: a.nota || "",
+        estado: a.estado || ""
+      };
+    }
+
+    async function enviarParaBackend(a) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(normalizarParaAPI(a))
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data || data.sucesso !== true) {
+        const msg = (data && (data.mensagem || data.erros?.join(", "))) || `Falha no envio (HTTP ${res.status})`;
+        throw new Error(msg);
+      }
+
+      return data;
+    }
+
     // ---------------------------
     const state = {
       cadastradas: [],
@@ -157,8 +206,10 @@
     // ---------------------------
     // Cadastro
     // ---------------------------
-    $("#formCadastro").addEventListener("submit", (e) => {
+    $("#formCadastro").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const form = e.target;
+      const submitButton = form.querySelector('button[type="submit"]');
 
       const a = {
         id: crypto.randomUUID(),
@@ -184,17 +235,28 @@
         createdAt: new Date().toISOString()
       };
 
-      state.cadastradas.unshift(a);
-      e.target.reset();
-      $("#area").value = "Pós-Graduação";
-      $("#fonte").value = "OE";
-      updateMetaAnual();
-      updateBeneficiariosTotal();
+      try {
+        if (submitButton) submitButton.disabled = true;
 
-      // Ir para tab "cadastradas"
-      switchTab("cadastradas");
+        await enviarParaBackend(a);
 
-      render();
+        state.cadastradas.unshift(a);
+        form.reset();
+        $("#area").value = "Pós-Graduação";
+        $("#fonte").value = "OE";
+        updateMetaAnual();
+        updateBeneficiariosTotal();
+
+        switchTab("cadastradas");
+        render();
+        alert("Gravado com sucesso");
+      } catch (err) {
+        console.error(err);
+        state.cadastradas = state.cadastradas.filter(x => x.id !== a.id);
+        alert("Erro ao gravar: " + (err?.message || "erro inesperado"));
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
     });
 
     // ---------------------------
