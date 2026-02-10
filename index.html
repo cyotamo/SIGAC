@@ -1,65 +1,44 @@
  <!doctype html>
 <html lang="pt-PT">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Universidade Rovuma — SIGAC</title>
-
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="utf-8">
+  <title>SIGAC | Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <!-- LOGIN CENTRALIZADO -->
-  <main class="login-shell">
-    <section class="login-card" aria-label="Página de login do SIGAC">
-      <!-- Cabeçalho dentro do container -->
-      <header class="login-header">
-        <div class="login-brand" aria-label="Identidade do sistema">
-          <div class="sigac-badge" aria-hidden="true">SIGAC</div>
-          <div class="login-brand-text">
-            <div class="login-title">Sistema Integrado de Gestão de Actividades Científicas</div>
-            <div class="login-subtitle">Registo • Monitoria • Relatórios • Evidências</div>
-          </div>
-        </div>
 
-        <div class="login-actions" aria-label="Ações rápidas">
-          <button class="btn-ghost" type="button" id="btnExportar">Exportar Dados</button>
-          <button class="btn-ghost" type="button" id="btnRepor">Repor Demo</button>
-        </div>
-      </header>
+  <div class="login-wrapper">
+    <div class="login-box">
 
-      <!-- Formulário (REMOVIDO: "Acesso institucional" / "Entrar no sistema" / "institucional") -->
-      <form class="login-form" autocomplete="on">
-        <div class="field">
-          <label for="perfil">Perfil</label>
-          <select id="perfil" name="perfil">
-            <option value="faculdade">Faculdade (Registo de actividades)</option>
-            <option value="direccao">Direcção Científica (Monitoria)</option>
-          </select>
-        </div>
+      <h1>Universidade Rovuma</h1>
+      <h2>Direcção Científica</h2>
+      <h3>Sistema de Gestão de Actividades Científicas (SIGAC)</h3>
 
-        <div class="field">
-          <label for="faculdade">Faculdade</label>
-          <select id="faculdade" name="faculdade">
-            <option>Faculdade de Ciências Económicas e Empresariais</option>
-          </select>
-        </div>
+      <p class="login-info">Autentique-se para aceder ao sistema</p>
 
-        <div class="field">
-          <label for="ano">Ano lectivo</label>
-          <input id="ano" name="ano" type="text" value="2026" inputmode="numeric" />
-        </div>
+      <form>
+        <input
+          type="email"
+          id="email"
+          placeholder="Email"
+          autofocus
+          required
+        >
 
-        <div class="login-row">
-          <button class="btn-enter" type="submit">Entrar</button>
-          <div class="login-session" id="sessaoTxt">
-            Sessão: Faculdade (Faculdade de Ciências Económicas e Empresariais) — 2026
-          </div>
-        </div>
+        <input
+          type="password"
+          placeholder="Password"
+          required
+        >
+
+        <button type="submit">ENTRAR</button>
       </form>
-    </section>
-  </main>
 
-  <script src="./login.js"></script>
+    </div>
+  </div>
+
+  <script src="login.js"></script>
 </body>
 </html>
