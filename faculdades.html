@@ -152,7 +152,7 @@
     /* Layout main */
     .main{
       display:grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 1fr;
       gap: 14px;
       align-items:start;
     }
@@ -180,38 +180,36 @@
     /* Tabs */
     .tabs{
       display:flex;
-      gap:10px;
-      padding: 12px 16px;
+      gap:12px;
+      align-items:center;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      padding: 8px 16px;
       border-bottom: 1px solid rgba(219,234,254,.95);
       background: rgba(255,255,255,.7);
-      flex-wrap:wrap;
     }
     .tab{
-      border:1px solid rgba(219,234,254,.95);
+      border:1px solid rgba(191,219,254,.95);
       background:#fff;
       color: var(--text);
-      border-radius: 999px;
+      border-radius: 12px;
       padding: 8px 12px;
       font-weight: 900;
       font-size: 12.5px;
       cursor:pointer;
       display:inline-flex;
       align-items:center;
-      gap:8px;
+      white-space: nowrap;
+      transition: all .18s ease;
+    }
+    .tab:hover{
+      background: #f4f9ff;
+      border-color: rgba(96,165,250,.55);
     }
     .tab[aria-selected="true"]{
+      background: #eaf3ff;
       border-color: rgba(96,165,250,.95);
-      box-shadow: 0 0 0 4px rgba(96,165,250,.18);
-    }
-
-    .badge{
-      background: rgba(219,234,254,.9);
-      border: 1px solid rgba(191,219,254,.95);
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 900;
-      color:#0b3a77;
+      box-shadow: 0 4px 12px rgba(96,165,250,.18);
     }
 
     /* Form */
@@ -419,15 +417,40 @@
     </header>
 
     <div class="main">
-      <!-- LEFT: Cadastro -->
-      <aside class="card">
-        <div class="card-h">
-          <h2>Cadastro (Plano)</h2>
-          <p>Registe as actividades do plano anual conforme a grelha. Após gravar, entram em <strong>Actividades Cadastradas</strong>.</p>
+      <section class="card content">
+        <div class="tabs" role="tablist" aria-label="Menu de gestão">
+          <button class="tab" id="tab-cadastro" role="tab" aria-selected="true" aria-controls="pane-cadastro" data-tab="cadastro">
+            Cadastro
+          </button>
+          <button class="tab" id="tab-cadastradas" role="tab" aria-selected="false" aria-controls="pane-cadastradas" data-tab="cadastradas">
+            Actividades
+          </button>
+          <button class="tab" id="tab-executadas" role="tab" aria-selected="false" aria-controls="pane-executadas" data-tab="executadas">
+            Executadas
+          </button>
+          <button class="tab" id="tab-canceladas" role="tab" aria-selected="false" aria-controls="pane-canceladas" data-tab="canceladas">
+            Canceladas
+          </button>
+          <button class="tab" id="tab-relatorio" role="tab" aria-selected="false" aria-controls="pane-relatorio" data-tab="relatorio">
+            Relatório
+          </button>
         </div>
 
-        <div class="card-b">
-          <form id="formCadastro">
+        <div class="stats" aria-label="Indicadores">
+          <div class="stat"><div class="k">Total</div><div class="v" id="sTotal">0</div></div>
+          <div class="stat"><div class="k">Pendentes</div><div class="v" id="sPend">0</div></div>
+          <div class="stat"><div class="k">Executadas</div><div class="v" id="sExec">0</div></div>
+          <div class="stat"><div class="k">Canceladas</div><div class="v" id="sCanc">0</div></div>
+        </div>
+
+        <div class="pane active" id="pane-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
+          <div class="card-h">
+            <h2>Cadastro (Plano)</h2>
+            <p>Registe as actividades do plano anual conforme a grelha. Após gravar, entram em <strong>Actividades Cadastradas</strong>.</p>
+          </div>
+
+          <div class="card-b">
+            <form id="formCadastro">
             <div class="grid">
               <div class="field">
                 <label for="num">Nº</label>
@@ -537,36 +560,12 @@
               <span class="mini">Ao gravar, a actividade entra como <strong>Pendente</strong> em “Actividades Cadastradas”.</span>
               <button class="btn" type="submit">Gravar actividade</button>
             </div>
-          </form>
-        </div>
-      </aside>
-
-      <!-- RIGHT: Tabs + Tables -->
-      <section class="card content">
-        <div class="tabs" role="tablist" aria-label="Abas de gestão">
-          <button class="tab" role="tab" aria-selected="true" data-tab="cadastradas">
-            Actividades Cadastradas <span class="badge" id="bCadastradas">0</span>
-          </button>
-          <button class="tab" role="tab" aria-selected="false" data-tab="executadas">
-            Executadas <span class="badge" id="bExecutadas">0</span>
-          </button>
-          <button class="tab" role="tab" aria-selected="false" data-tab="canceladas">
-            Canceladas <span class="badge" id="bCanceladas">0</span>
-          </button>
-          <button class="tab" role="tab" aria-selected="false" data-tab="relatorio">
-            Relatório (Executadas)
-          </button>
-        </div>
-
-        <div class="stats" aria-label="Indicadores">
-          <div class="stat"><div class="k">Total</div><div class="v" id="sTotal">0</div></div>
-          <div class="stat"><div class="k">Pendentes</div><div class="v" id="sPend">0</div></div>
-          <div class="stat"><div class="k">Executadas</div><div class="v" id="sExec">0</div></div>
-          <div class="stat"><div class="k">Canceladas</div><div class="v" id="sCanc">0</div></div>
+            </form>
+          </div>
         </div>
 
         <!-- Pane: Cadastradas -->
-        <div class="pane active" id="pane-cadastradas">
+        <div class="pane" id="pane-cadastradas" role="tabpanel" aria-labelledby="tab-cadastradas" hidden>
           <div class="table-wrap">
             <table>
               <thead>
@@ -588,7 +587,7 @@
         </div>
 
         <!-- Pane: Executadas -->
-        <div class="pane" id="pane-executadas">
+        <div class="pane" id="pane-executadas" role="tabpanel" aria-labelledby="tab-executadas" hidden>
           <div class="table-wrap">
             <table>
               <thead>
@@ -608,7 +607,7 @@
         </div>
 
         <!-- Pane: Canceladas -->
-        <div class="pane" id="pane-canceladas">
+        <div class="pane" id="pane-canceladas" role="tabpanel" aria-labelledby="tab-canceladas" hidden>
           <div class="table-wrap">
             <table>
               <thead>
@@ -627,7 +626,7 @@
         </div>
 
         <!-- Pane: Relatório -->
-        <div class="pane" id="pane-relatorio">
+        <div class="pane" id="pane-relatorio" role="tabpanel" aria-labelledby="tab-relatorio" hidden>
           <div class="card-b">
             <div class="help">
               Aqui vais gerar o <strong>relatório das actividades executadas</strong>. Nesta versão (demo), é gerado um relatório em HTML pronto para imprimir/guardar em PDF.
@@ -763,11 +762,7 @@
       return `<span class="chip">● ${estado}</span>`;
     }
 
-    function updateBadges(){
-      $("#bCadastradas").textContent = state.cadastradas.length;
-      $("#bExecutadas").textContent = state.executadas.length;
-      $("#bCanceladas").textContent = state.canceladas.length;
-
+    function updateStats(){
       const total = state.cadastradas.length + state.executadas.length + state.canceladas.length;
       $("#sTotal").textContent = total;
       $("#sPend").textContent = state.cadastradas.filter(x => x.estado === "Pendente" || x.estado === "Adiada").length;
@@ -840,7 +835,7 @@
         </tr>
       `).join("");
 
-      updateBadges();
+      updateStats();
     }
 
     function escapeHtml(str){
@@ -855,23 +850,26 @@
     // ---------------------------
     // Tabs
     // ---------------------------
-    document.querySelectorAll(".tab").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
-        btn.setAttribute("aria-selected", "true");
-
-        const tab = btn.dataset.tab;
-        document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
-        $("#pane-" + tab).classList.add("active");
+    function switchTab(tabName){
+      document.querySelectorAll(".tab").forEach(tab => {
+        const isActive = tab.dataset.tab === tabName;
+        tab.setAttribute("aria-selected", String(isActive));
       });
+
+      document.querySelectorAll(".pane").forEach(panel => {
+        const isActive = panel.id === `pane-${tabName}`;
+        panel.classList.toggle("active", isActive);
+        panel.hidden = !isActive;
+      });
+    }
+
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
     });
 
-    $("#btnRelatorioTopo").addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
-      document.querySelector('.tab[data-tab="relatorio"]').setAttribute("aria-selected", "true");
-      document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
-      $("#pane-relatorio").classList.add("active");
-    });
+    $("#btnRelatorioTopo").addEventListener("click", () => switchTab("relatorio"));
+
+    switchTab("cadastro");
 
     // ---------------------------
     // Cadastro
@@ -909,10 +907,7 @@
       $("#fonte").value = "OE";
 
       // Ir para tab "cadastradas"
-      document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
-      document.querySelector('.tab[data-tab="cadastradas"]').setAttribute("aria-selected", "true");
-      document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
-      $("#pane-cadastradas").classList.add("active");
+      switchTab("cadastradas");
 
       render();
     });
