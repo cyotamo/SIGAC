@@ -241,6 +241,9 @@
     }
 
     .span2{ grid-column: 1 / -1; }
+    .cols-5{ grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .cols-4{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .cols-3{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
     .mini{
       font-size: 12px;
@@ -374,6 +377,14 @@
     /* Responsive */
     @media (max-width: 980px){
       .main{ grid-template-columns: 1fr; }
+      .cols-5,
+      .cols-4,
+      .cols-3{ grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px){
+      .cols-5,
+      .cols-4,
+      .cols-3{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -426,12 +437,7 @@
           <div class="card-b">
             <form id="formCadastro">
             <div class="grid">
-              <div class="field">
-                <label for="num">Nº</label>
-                <input id="num" placeholder="Ex.: 1" inputmode="numeric" required />
-              </div>
-
-              <div class="field">
+              <div class="field span2">
                 <label for="area">Área</label>
                 <select id="area" required>
                   <option value="Pós-Graduação">A. Pós-Graduação</option>
@@ -453,61 +459,66 @@
               </div>
 
               <div class="field span2">
-                <label for="indicador">Indicador de produto</label>
-                <input id="indicador" placeholder="Ex.: Nº de seminários, Nº de artigos submetidos, Nº de participantes..." required />
-              </div>
-
-              <div class="field">
-                <label for="metaAnual">Meta anual</label>
-                <input id="metaAnual" placeholder="Ex.: 4" />
-              </div>
-
-              <div class="field">
                 <label for="local">Localização</label>
                 <input id="local" placeholder="Ex.: Campus, distrito, província..." />
               </div>
 
-              <div class="field">
-                <label for="t1">Meta T1</label>
-                <input id="t1" placeholder="I" />
-              </div>
-              <div class="field">
-                <label for="t2">Meta T2</label>
-                <input id="t2" placeholder="II" />
-              </div>
-              <div class="field">
-                <label for="t3">Meta T3</label>
-                <input id="t3" placeholder="III" />
-              </div>
-              <div class="field">
-                <label for="t4">Meta T4</label>
-                <input id="t4" placeholder="IV" />
+              <div class="field span2">
+                <label for="indicador">Indicador de produto</label>
+                <input id="indicador" placeholder="Ex.: Nº de seminários, Nº de artigos submetidos, Nº de participantes..." required />
               </div>
 
-              <div class="field">
-                <label for="benefTotal">Beneficiários (Total)</label>
-                <input id="benefTotal" inputmode="numeric" placeholder="0" />
-              </div>
-              <div class="field">
-                <label for="benefH">Homens</label>
-                <input id="benefH" inputmode="numeric" placeholder="0" />
-              </div>
-              <div class="field">
-                <label for="benefM">Mulheres</label>
-                <input id="benefM" inputmode="numeric" placeholder="0" />
-              </div>
-              <div class="field">
-                <label for="orcamento">Orçamento (MZN)</label>
-                <input id="orcamento" inputmode="decimal" placeholder="0.00" />
+              <div class="grid span2 cols-5">
+                <div class="field">
+                  <label for="metaAnual">Meta anual</label>
+                  <input id="metaAnual" placeholder="Ex.: 4" inputmode="numeric" />
+                </div>
+                <div class="field">
+                  <label for="t1">Meta T1</label>
+                  <input id="t1" placeholder="I" inputmode="numeric" />
+                </div>
+                <div class="field">
+                  <label for="t2">Meta T2</label>
+                  <input id="t2" placeholder="II" inputmode="numeric" />
+                </div>
+                <div class="field">
+                  <label for="t3">Meta T3</label>
+                  <input id="t3" placeholder="III" inputmode="numeric" />
+                </div>
+                <div class="field">
+                  <label for="t4">Meta T4</label>
+                  <input id="t4" placeholder="IV" inputmode="numeric" />
+                </div>
               </div>
 
-              <div class="field">
-                <label for="fonte">Fonte de financiamento</label>
-                <select id="fonte">
-                  <option value="OE">OE</option>
-                  <option value="Externo">O. Externo</option>
-                  <option value="OE+Externo">OE + O. Externo</option>
-                </select>
+              <div class="grid span2 cols-3">
+                <div class="field">
+                  <label for="benefTotal">Beneficiários (Total)</label>
+                  <input id="benefTotal" inputmode="numeric" placeholder="0" />
+                </div>
+                <div class="field">
+                  <label for="benefH">Homens</label>
+                  <input id="benefH" inputmode="numeric" placeholder="0" />
+                </div>
+                <div class="field">
+                  <label for="benefM">Mulheres</label>
+                  <input id="benefM" inputmode="numeric" placeholder="0" />
+                </div>
+              </div>
+
+              <div class="grid span2">
+                <div class="field">
+                  <label for="fonte">Fonte de financiamento</label>
+                  <select id="fonte">
+                    <option value="OE">OE</option>
+                    <option value="Externo">O. Externo</option>
+                    <option value="OE+Externo">OE + O. Externo</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="orcamento">Orçamento (MZN)</label>
+                  <input id="orcamento" inputmode="decimal" placeholder="0.00" />
+                </div>
               </div>
 
               <div class="field">
@@ -843,7 +854,7 @@
 
       const a = {
         id: crypto.randomUUID(),
-        num: $("#num").value.trim(),
+        num: String(state.cadastradas.length + state.executadas.length + state.canceladas.length + 1),
         area: $("#area").value,
         accao: $("#accao").value.trim(),
         obj: $("#obj").value.trim(),
