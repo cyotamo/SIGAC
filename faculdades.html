@@ -33,7 +33,7 @@
             Cadastro
           </button>
           <button class="tab" id="tab-cadastradas" role="tab" aria-selected="false" aria-controls="pane-cadastradas" data-tab="cadastradas">
-            Actividades
+            Planificadas
           </button>
           <button class="tab" id="tab-executadas" role="tab" aria-selected="false" aria-controls="pane-executadas" data-tab="executadas">
             Executadas
@@ -73,8 +73,8 @@
               </div>
 
               <div class="field span2">
-                <label for="obj">Objectivo específico</label>
-                <textarea id="obj" placeholder="Descreva o objectivo específico..." required></textarea>
+                <label for="obj">Objectivos específicos</label>
+                <textarea id="obj" placeholder="Descreva os objectivos específicos..." required></textarea>
               </div>
 
               <div class="field span2">
@@ -90,7 +90,7 @@
               <div class="grid span2 cols-5">
                 <div class="field">
                   <label for="metaAnual">Meta anual</label>
-                  <input id="metaAnual" placeholder="Ex.: 4" inputmode="numeric" />
+                  <input id="metaAnual" placeholder="Ex.: 4" inputmode="numeric" readonly />
                 </div>
                 <div class="field">
                   <label for="t1">Meta T1</label>
@@ -113,7 +113,7 @@
               <div class="grid span2 cols-3">
                 <div class="field">
                   <label for="benefTotal">Beneficiários (Total)</label>
-                  <input id="benefTotal" inputmode="numeric" placeholder="0" />
+                  <input id="benefTotal" inputmode="numeric" placeholder="0" readonly />
                 </div>
                 <div class="field">
                   <label for="benefH">Homens</label>
@@ -161,8 +161,7 @@
             </div>
 
             <div class="row">
-              <span class="mini">Ao gravar, a actividade entra como <strong>Pendente</strong> em “Actividades Cadastradas”.</span>
-              <button class="btn" type="submit">Gravar actividade</button>
+              <button class="btn" type="submit">Guardar actividade</button>
             </div>
             </form>
           </div>
