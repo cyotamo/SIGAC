@@ -267,6 +267,25 @@
 
     switchTab("cadastro");
 
+    function aplicarMascaraNumericaInteira(selector){
+      const input = $(selector);
+      if (!input) return;
+
+      input.addEventListener("input", () => {
+        const somenteDigitos = input.value.replace(/\D+/g, "");
+        if (input.value !== somenteDigitos) {
+          input.value = somenteDigitos;
+        }
+      });
+
+      input.addEventListener("paste", (event) => {
+        event.preventDefault();
+        const texto = event.clipboardData?.getData("text") || "";
+        input.value = texto.replace(/\D+/g, "");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+
     function updateMetaAnual(){
       const total = ["#t1", "#t2", "#t3", "#t4"]
         .map((selector) => parsePositiveNumber($(selector).value))
@@ -279,6 +298,8 @@
       const total = parsePositiveNumber($("#benefH").value) + parsePositiveNumber($("#benefM").value);
       $("#benefTotal").value = String(total);
     }
+
+    ["#t1", "#t2", "#t3", "#t4", "#benefH", "#benefM"].forEach(aplicarMascaraNumericaInteira);
 
     ["#t1", "#t2", "#t3", "#t4"].forEach((selector) => {
       $(selector).addEventListener("input", updateMetaAnual);
