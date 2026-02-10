@@ -98,13 +98,17 @@
       data.dados.forEach((item, idx) => {
         const a = normalizarDoBackend(item, idx);
 
-        // Se pedimos "Cancelada", só enche canceladas (evita trabalho extra)
+        // Se pedimos um estado específico, encher só o array correspondente
+        if (estado === "Executada") {
+          state.executadas.unshift(a);
+          return;
+        }
         if (estado === "Cancelada") {
           state.canceladas.unshift(a);
           return;
         }
 
-        // caso geral: distribuir por estado
+        // modo geral (sem filtro)
         if (a.estado === "Executada") state.executadas.unshift(a);
         else if (a.estado === "Cancelada") state.canceladas.unshift(a);
         else state.cadastradas.unshift(a); // Planificada/Adiada
@@ -247,7 +251,7 @@
           if (tab === "canceladas") {
             await carregarDoBackend("Cancelada");
           } else if (tab === "executadas") {
-            await carregarDoBackend();
+            await carregarDoBackend("Executada");
           } else if (tab === "cadastradas") {
             await carregarDoBackend();
           } else if (tab === "relatorio") {
