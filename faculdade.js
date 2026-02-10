@@ -364,7 +364,6 @@
         updateMetaAnual();
         updateBeneficiariosTotal();
 
-        switchTab("cadastradas");
         if (cadastroFeedback) {
           cadastroFeedback.textContent = "Dados enviados com sucesso!";
           cadastroFeedback.classList.remove("is-error");
@@ -398,9 +397,7 @@
       $("#mInicio").value = a.inicio || "";
       $("#mFim").value = a.fim || "";
       $("#mEstado").value = a.estado || "Planificada";
-      $("#mResp").value = a.resp || "";
       $("#mMotivo").value = a.motivo || "";
-      $("#mLinks").value = a.evidenciasText || "";
       $("#mFicheiros").value = "";
       $("#mInfo").textContent = `Actividade #${a.num} • ${a.area}`;
 
@@ -426,20 +423,15 @@
       if (!a) return;
 
       const novoEstado = $("#mEstado").value;
-      const links = $("#mLinks").value.trim();
       const ficheiros = $("#mFicheiros").files?.length || 0;
-      const primeiroLink = links.split(",").map(s => s.trim()).filter(Boolean)[0] || "";
 
-      a.accao = $("#mAccao").value.trim();
       a.inicio = $("#mInicio").value;
       a.fim = $("#mFim").value;
-      a.resp = $("#mResp").value.trim();
       a.estado = novoEstado;
       a.motivo = $("#mMotivo").value.trim();
       // Nota: mudança de estado/evidências no modal ainda não persiste no Sheets.
       // O backend actual só faz appendRow; o update por id será feito num próximo endpoint.
-      a.evidenciasText = primeiroLink;
-      a.evidenciasCount = (primeiroLink ? 1 : 0) + ficheiros;
+      a.evidenciasCount = ficheiros;
 
       // Remover de qualquer lista e reenfileirar conforme estado
       removeFromAll(a.id);
