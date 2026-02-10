@@ -9,6 +9,11 @@
     };
 
     const $ = (s) => document.querySelector(s);
+    const parsePositiveNumber = (value) => {
+      const sanitized = String(value || "").replace(",", ".").trim();
+      const n = Number(sanitized);
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
     const fmtMoney = (v) => {
       const n = Number(String(v || "0").replace(",", "."));
       if (Number.isNaN(n)) return "—";
@@ -128,6 +133,27 @@
 
     switchTab("cadastro");
 
+    function updateMetaAnual(){
+      const total = ["#t1", "#t2", "#t3", "#t4"]
+        .map((selector) => parsePositiveNumber($(selector).value))
+        .reduce((acc, value) => acc + value, 0);
+
+      $("#metaAnual").value = String(total);
+    }
+
+    function updateBeneficiariosTotal(){
+      const total = parsePositiveNumber($("#benefH").value) + parsePositiveNumber($("#benefM").value);
+      $("#benefTotal").value = String(total);
+    }
+
+    ["#t1", "#t2", "#t3", "#t4"].forEach((selector) => {
+      $(selector).addEventListener("input", updateMetaAnual);
+    });
+
+    ["#benefH", "#benefM"].forEach((selector) => {
+      $(selector).addEventListener("input", updateBeneficiariosTotal);
+    });
+
     // ---------------------------
     // Cadastro
     // ---------------------------
@@ -162,6 +188,8 @@
       e.target.reset();
       $("#area").value = "Pós-Graduação";
       $("#fonte").value = "OE";
+      updateMetaAnual();
+      updateBeneficiariosTotal();
 
       // Ir para tab "cadastradas"
       switchTab("cadastradas");
