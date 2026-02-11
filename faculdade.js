@@ -63,12 +63,12 @@
       const email = obterEmailUtilizador();
 
       return {
-        acao: "criar",
+        operacao: "criar",
         email,
         id: a.id,
         dataRegisto: a.createdAt || "",
         area: a.area,
-        accao: a.accao,
+        acao: a.accao,
         objectivos: a.obj,
         localizacao: a.local,
         indicador: a.indicador,
@@ -131,7 +131,7 @@
     }
 
     async function atualizarAtividade(payload) {
-      payload.acao = payload.acao || "atualizar";
+      payload.operacao = payload.operacao || "atualizar";
       payload.email = obterEmailUtilizador();
       console.log("PAYLOAD atualizar ->", payload);
 
@@ -563,8 +563,9 @@
       const evidenciaUrlDigitada = $("#mEvidenciaUrl").value.trim();
 
       const payload = {
-        acao: "atualizar",
+        operacao: "atualizar",
         id: a.id,
+        acao: $("#mAccao").value.trim() || undefined,
         periodoInicio: $("#mInicio").value || undefined,
         periodoFim: $("#mFim").value || undefined,
         estado: novoEstado || undefined,
@@ -591,6 +592,7 @@
 
         const data = await atualizarAtividade(payload);
 
+        a.accao = payload.acao || a.accao;
         a.inicio = payload.periodoInicio || "";
         a.fim = payload.periodoFim || "";
         a.estado = novoEstado;
@@ -651,7 +653,7 @@
       const porPeriodo = Boolean(inicio && fim);
 
       const payload = {
-        acao: "gerar_relatorio",
+        operacao: "gerar_relatorio",
         email: obterEmailUtilizador(),
         formato: formatoBack,
         opcao: normalizarOpcaoRelatorioFront_(tipo),
