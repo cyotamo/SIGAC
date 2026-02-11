@@ -2,7 +2,7 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbxh13QZ0OfmMWdZHFCDv7KYrfFUb8xKdjLJN2gdzDx53al7Y56NM8K9y8ttoXLsQatb/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC-z5eNHi-rosi0Ak64bPeQZU-6oJA9DDk",
