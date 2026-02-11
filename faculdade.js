@@ -171,20 +171,14 @@
     }
 
     async function carregarDoBackend(estado) {
-      const payload = {
-        acao: "listar",
-        email: obterEmailUtilizador()
-      };
+      const email = obterEmailUtilizador();
+      const params = new URLSearchParams({ email });
+      if (estado) params.set("estado", estado);
 
-      if (estado) payload.estado = estado;
+      const url = `${API_URL}?${params.toString()}`;
+      console.log("GET listar ->", url);
 
-      console.log("PAYLOAD listar ->", payload);
-
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
+      const res = await fetch(url);
 
       const data = await res.json().catch(() => null);
 
