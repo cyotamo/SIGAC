@@ -1,20 +1,22 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getAuth,
   signInWithEmailAndPassword,
   signOut,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Substitui estes valores pelos dados reais do teu projecto Firebase.
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "COLOCA_A_TUA_API_KEY",
+  apiKey: "AIzaSyC-z5eNHi-rosi0Ak64bPeQZU-6oJA9DDk",
   authDomain: "sigacur00.firebaseapp.com",
   projectId: "sigacur00",
   storageBucket: "sigacur00.firebasestorage.app",
-  messagingSenderId: "COLOCA_O_MESSAGING_SENDER_ID",
-  appId: "COLOCA_O_APP_ID",
+  messagingSenderId: "224944945440",
+  appId: "1:224944945440:web:743589f8f137d25d44ff45"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
