@@ -32,9 +32,20 @@
       };
     }
 
+    async function parseBackendResponse(res) {
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || data.sucesso !== true) {
+        console.log("RESPOSTA API ->", data);
+        const detalhes = (data && (data.erros ? data.erros.join(" | ") : data.mensagem))
+          || (data && data.httpStatus ? `HTTP ${data.httpStatus}` : `HTTP ${res.status}`);
+        throw new Error(detalhes);
+      }
+      return data;
+    }
+
     async function enviarParaBackend(a) {
       const payload = normalizarParaAPI(a);
-      console.log("PAYLOAD ->", payload);
+      console.log("PAYLOAD cadastro ->", payload);
 
       const res = await fetch(API_URL, {
         method: "POST",
@@ -42,15 +53,32 @@
         body: JSON.stringify(payload)
       });
 
-      const data = await res.json().catch(() => null);
+      return parseBackendResponse(res);
+    }
 
-      if (!res.ok || !data || data.sucesso !== true) {
-        console.log("RESPOSTA API ->", data);
-        const detalhes = (data && (data.erros ? data.erros.join(" | ") : data.mensagem)) || `HTTP ${res.status}`;
-        throw new Error(detalhes);
-      }
+    function fileToBase64SemPrefixo(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const conteudo = String(reader.result || "");
+          const base64 = conteudo.includes(",") ? conteudo.split(",")[1] : conteudo;
+          resolve(base64);
+        };
+        reader.onerror = () => reject(new Error("Falha ao ler ficheiro de evidência."));
+        reader.readAsDataURL(file);
+      });
+    }
 
-      return data;
+    async function atualizarAtividade(payload) {
+      console.log("PAYLOAD atualizar ->", payload);
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      return parseBackendResponse(res);
     }
 
     function normalizarDoBackend(item, idx) {
@@ -181,7 +209,11 @@
           </td>
           <td>${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.resp || "—")}</td>
-          <td>${(a.evidenciasCount || 0) > 0 ? `<span class="chip ok">📎 ${a.evidenciasCount}</span>` : `<span class="chip">—</span>`}</td>
+          <td>
+            ${a.evidenciasText
+              ? `<a href="${escapeHtml(a.evidenciasText)}" target="_blank" rel="noopener noreferrer">Ver evidência</a>`
+              : ((a.evidenciasCount || 0) > 0 ? `<span class="chip ok">📎 ${a.evidenciasCount}</span>` : `<span class="chip">—</span>`)}
+          </td>
           <td>${chipEstado("Executada")}</td>
         </tr>
       `).join("");
@@ -397,7 +429,10 @@
       $("#mFim").value = a.fim || "";
       $("#mEstado").value = a.estado || "Planificada";
       $("#mMotivo").value = a.motivo || "";
+      $("#mEvidenciaUrl").value = a.evidenciasText || "";
       $("#mFicheiros").value = "";
+      $("#modalFeedback").textContent = "";
+      $("#modalFeedback").classList.remove("is-error");
       $("#mInfo").textContent = `Actividade #${a.num} • ${a.area}`;
 
       $("#modalBackdrop").classList.add("show");
@@ -417,30 +452,78 @@
     // ---------------------------
     // Modal save: move items between tabs
     // ---------------------------
-    $("#btnGuardarModal").addEventListener("click", () => {
+    $("#btnGuardarModal").addEventListener("click", async () => {
       const a = state.currentEdit;
       if (!a) return;
+      const modalFeedback = $("#modalFeedback");
+      const btnGuardarModal = $("#btnGuardarModal");
 
       const novoEstado = $("#mEstado").value;
-      const ficheiros = $("#mFicheiros").files?.length || 0;
+      const ficheirosInput = $("#mFicheiros").files || [];
+      const ficheiros = ficheirosInput.length;
+      const evidenciaUrlDigitada = $("#mEvidenciaUrl").value.trim();
 
-      a.inicio = $("#mInicio").value;
-      a.fim = $("#mFim").value;
-      a.estado = novoEstado;
-      a.motivo = $("#mMotivo").value.trim();
-      // Nota: mudança de estado/evidências no modal ainda não persiste no Sheets.
-      // O backend actual só faz appendRow; o update por id será feito num próximo endpoint.
-      a.evidenciasCount = ficheiros;
+      const payload = {
+        acao: "atualizar",
+        id: a.id,
+        periodoInicio: $("#mInicio").value || undefined,
+        periodoFim: $("#mFim").value || undefined,
+        estado: novoEstado || undefined,
+        motivo: $("#mMotivo").value.trim() || undefined,
+        evidenciaUrl: evidenciaUrlDigitada || undefined
+      };
 
-      // Remover de qualquer lista e reenfileirar conforme estado
-      removeFromAll(a.id);
+      if (ficheirosInput[0]) {
+        payload.evidencia = {
+          nome: ficheirosInput[0].name,
+          mimeType: ficheirosInput[0].type || "application/octet-stream",
+          base64: await fileToBase64SemPrefixo(ficheirosInput[0])
+        };
+      }
 
-      if (novoEstado === "Executada") state.executadas.unshift(a);
-      else if (novoEstado === "Cancelada") state.canceladas.unshift(a);
-      else state.cadastradas.unshift(a); // Planificada/Adiada ficam aqui
+      try {
+        btnGuardarModal.disabled = true;
+        btnGuardarModal.classList.add("is-loading");
+        btnGuardarModal.setAttribute("aria-busy", "true");
+        if (modalFeedback) {
+          modalFeedback.textContent = "A actualizar actividade...";
+          modalFeedback.classList.remove("is-error");
+        }
 
-      closeModal();
-      render();
+        const data = await atualizarAtividade(payload);
+
+        a.inicio = payload.periodoInicio || "";
+        a.fim = payload.periodoFim || "";
+        a.estado = novoEstado;
+        a.motivo = payload.motivo || "";
+        a.evidenciasCount = ficheiros;
+        a.evidenciasText = data.evidenciaUrl || payload.evidenciaUrl || a.evidenciasText || "";
+
+        // Remover de qualquer lista e reenfileirar conforme estado
+        removeFromAll(a.id);
+
+        if (novoEstado === "Executada") state.executadas.unshift(a);
+        else if (novoEstado === "Cancelada") state.canceladas.unshift(a);
+        else state.cadastradas.unshift(a); // Planificada/Adiada ficam aqui
+
+        if (modalFeedback) {
+          modalFeedback.textContent = data.mensagem || "Actividade actualizada com sucesso.";
+          modalFeedback.classList.remove("is-error");
+        }
+
+        closeModal();
+        render();
+      } catch (err) {
+        console.error(err);
+        if (modalFeedback) {
+          modalFeedback.textContent = `Erro ao actualizar: ${err?.message || "erro inesperado"}`;
+          modalFeedback.classList.add("is-error");
+        }
+      } finally {
+        btnGuardarModal.disabled = false;
+        btnGuardarModal.classList.remove("is-loading");
+        btnGuardarModal.removeAttribute("aria-busy");
+      }
     });
 
     function removeFromAll(id){
