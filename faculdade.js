@@ -562,8 +562,21 @@
       state.canceladas = state.canceladas.filter(x => x.id !== id);
     }
 
+    function normalizarOpcaoRelatorioFront_(tipo) {
+      const t = String(tipo || "").trim().toLowerCase();
+
+      if (t.startsWith("toda")) return "Todas";
+      if (t.startsWith("execut")) return "Executadas";
+      if (t.startsWith("planif")) return "Planificadas";
+      if (t.startsWith("cancel")) return "Canceladas";
+
+      return tipo;
+    }
+
     async function gerarRelatorioViaAPI({ tipo, inicio, fim, formato }) {
       const feedback = $("#relatorioFeedback");
+
+      console.log("relatorioTipo.value =", tipo);
 
       const formatoBack = (formato === "xls") ? "xlsx" : formato;
       const porPeriodo = Boolean(inicio && fim);
@@ -571,7 +584,7 @@
       const payload = {
         acao: "gerar_relatorio",
         formato: formatoBack,
-        opcao: tipo,
+        opcao: normalizarOpcaoRelatorioFront_(tipo),
         porPeriodo,
         dataInicio: porPeriodo ? inicio : undefined,
         dataFim: porPeriodo ? fim : undefined,
@@ -598,8 +611,8 @@
           feedback.textContent = "Falha de rede ao gerar relatório. Verifica a ligação e tenta novamente.";
           feedback.classList.add("is-error");
         }
-        console.error("Erro de rede:", err);
-        return false;
+        console.error(err);
+        return;
       }
 
       if (!res.ok || !data || data.sucesso !== true) {
@@ -609,7 +622,7 @@
           feedback.classList.add("is-error");
         }
         console.error("Erro ao gerar relatório:", data);
-        return false;
+        return;
       }
 
       const fileUrl = data?.ficheiro?.url;
@@ -619,7 +632,7 @@
           feedback.classList.add("is-error");
         }
         console.error("Sem ficheiro.url:", data);
-        return false;
+        return;
       }
 
       if (feedback) {
@@ -628,7 +641,7 @@
       }
 
       window.open(fileUrl, "_blank", "noopener,noreferrer");
-      return true;
+      closeRelatorioModal();
     }
 
     // ---------------------------
@@ -655,8 +668,7 @@
         feedback.classList.remove("is-error");
       }
 
-      const sucesso = await gerarRelatorioViaAPI({ tipo, inicio, fim, formato });
-      if (sucesso) closeRelatorioModal();
+      await gerarRelatorioViaAPI({ tipo, inicio, fim, formato });
     });
     $("#btnRelatorioTopo").addEventListener("dblclick", () => gerarRelatorioImprimivel());
 
