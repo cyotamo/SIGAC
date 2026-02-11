@@ -15,10 +15,10 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    let utilizadorEmail = "";
+    let EMAIL_ATUAL = "";
 
     function obterEmailUtilizador() {
-      const email = normalizarEmail(auth.currentUser?.email || utilizadorEmail);
+      const email = normalizarEmail(auth.currentUser?.email || EMAIL_ATUAL);
       if (!email) {
         throw new Error("Sessão expirada. Faça login novamente.");
       }
@@ -38,16 +38,17 @@
         return;
       }
 
-      utilizadorEmail = normalizarEmail(user.email);
-      if (!emailAutorizado(utilizadorEmail)) {
+      EMAIL_ATUAL = normalizarEmail(user.email);
+      if (!emailAutorizado(EMAIL_ATUAL)) {
         signOut(auth).finally(() => {
           window.location.href = "index.html";
         });
         return;
       }
 
-      if (utilizadorEmail) {
-        atualizarContextoUtilizador(utilizadorEmail);
+      if (EMAIL_ATUAL) {
+        atualizarContextoUtilizador(EMAIL_ATUAL);
+        carregarDoBackend().catch(console.error);
       }
     });
 
@@ -60,12 +61,10 @@
     // DEMO DATA / STATE
     function normalizarParaAPI(a) {
       const email = obterEmailUtilizador();
-      const siglaFaculdade = email.split("@")[0].toUpperCase();
 
       return {
         acao: "criar",
         email,
-        siglaFaculdade,
         id: a.id,
         dataRegisto: a.createdAt || "",
         area: a.area,
@@ -132,6 +131,7 @@
     }
 
     async function atualizarAtividade(payload) {
+      payload.acao = payload.acao || "atualizar";
       payload.email = obterEmailUtilizador();
       console.log("PAYLOAD atualizar ->", payload);
 
@@ -171,13 +171,25 @@
     }
 
     async function carregarDoBackend(estado) {
-      const url = estado ? `${API_URL}?estado=${encodeURIComponent(estado)}` : API_URL;
+      const payload = {
+        acao: "listar",
+        email: obterEmailUtilizador()
+      };
 
-      const res = await fetch(url, { method: "GET" });
+      if (estado) payload.estado = estado;
+
+      console.log("PAYLOAD listar ->", payload);
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data || data.sucesso !== true || !Array.isArray(data.dados)) {
-        console.log("RESPOSTA GET ->", data);
+        console.log("RESPOSTA listar ->", data);
         throw new Error((data && data.mensagem) || `HTTP ${res.status}`);
       }
 
@@ -657,12 +669,10 @@
 
       Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
-      const url = `${API_URL}?acao=gerar_relatorio`;
-
       let res;
       let data;
       try {
-        res = await fetch(url, {
+        res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
@@ -887,6 +897,5 @@
     });
 
     // Start
-    carregarDoBackend().catch(console.error);
     render();
   
