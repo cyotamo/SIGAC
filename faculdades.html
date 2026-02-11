@@ -240,7 +240,7 @@
 
             <div class="row" style="margin-top:12px">
               <div class="mini">Inclui: nº, área, acção, período, responsável, orçamento e evidências.</div>
-              <button class="btn" id="btnGerarRelatorio">Gerar relatório</button>
+              <button class="btn" id="btnGerarRelatorio">Relatórios</button>
             </div>
 
             <div style="margin-top:12px" class="table-wrap">
@@ -262,6 +262,55 @@
           </div>
         </div>
       </section>
+    </div>
+  </div>
+
+  <!-- MODAL: Relatório -->
+  <div class="modal-backdrop" id="modalRelatorioBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Relatório">
+      <div class="modal-h">
+        <h3>Relatório</h3>
+        <button class="btn-ghost" id="btnFecharRelatorio">Fechar</button>
+      </div>
+
+      <div class="modal-b">
+        <div class="grid">
+          <div class="field span2">
+            <label for="relatorioTipo">Tipo</label>
+            <select id="relatorioTipo">
+              <option value="Planificada">Planificadas</option>
+              <option value="Executada" selected>Executadas</option>
+              <option value="Cancelada">Canceladas</option>
+              <option value="Todas">Todas</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="relatorioInicio">Período (Início)</label>
+            <input id="relatorioInicio" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="relatorioFim">Período (Fim)</label>
+            <input id="relatorioFim" type="date" />
+          </div>
+
+          <div class="field span2">
+            <label for="relatorioFormato">Tipo de ficheiro</label>
+            <select id="relatorioFormato">
+              <option value="xls">Xls</option>
+              <option value="doc">.doc</option>
+              <option value="pdf" selected>PDF</option>
+            </select>
+            <div class="mini">Nesta versão demo, o relatório é gerado em HTML para impressão/guardar como PDF.</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <span id="relatorioFeedback" class="inline-feedback" role="status" aria-live="polite"></span>
+          <button class="btn" id="btnGerarRelatorioModal">Gerar relatório</button>
+        </div>
+      </div>
     </div>
   </div>
 

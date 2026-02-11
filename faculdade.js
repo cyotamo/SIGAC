@@ -447,7 +447,37 @@
     }
     $("#btnFechar").addEventListener("click", closeModal);
     $("#modalBackdrop").addEventListener("click", (e) => { if (e.target.id === "modalBackdrop") closeModal(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+    function closeRelatorioModal(){
+      const backdrop = $("#modalRelatorioBackdrop");
+      if (!backdrop) return;
+      backdrop.classList.remove("show");
+      backdrop.setAttribute("aria-hidden", "true");
+    }
+
+    function openRelatorioModal(){
+      const backdrop = $("#modalRelatorioBackdrop");
+      if (!backdrop) return;
+      const feedback = $("#relatorioFeedback");
+      if (feedback) {
+        feedback.textContent = "";
+        feedback.classList.remove("is-error");
+      }
+      backdrop.classList.add("show");
+      backdrop.setAttribute("aria-hidden", "false");
+      setTimeout(() => $("#relatorioTipo")?.focus(), 50);
+    }
+
+    $("#btnGerarRelatorio").addEventListener("click", openRelatorioModal);
+    $("#btnFecharRelatorio").addEventListener("click", closeRelatorioModal);
+    $("#modalRelatorioBackdrop").addEventListener("click", (e) => {
+      if (e.target.id === "modalRelatorioBackdrop") closeRelatorioModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      closeModal();
+      closeRelatorioModal();
+    });
 
     // ---------------------------
     // Modal save: move items between tabs
@@ -535,11 +565,55 @@
     // ---------------------------
     // Relatório: imprimir HTML
     // ---------------------------
-    $("#btnGerarRelatorio").addEventListener("click", () => gerarRelatorioImprimivel());
+    $("#btnGerarRelatorioModal").addEventListener("click", () => {
+      const tipo = $("#relatorioTipo").value;
+      const inicio = $("#relatorioInicio").value;
+      const fim = $("#relatorioFim").value;
+      const formato = $("#relatorioFormato").value;
+      const feedback = $("#relatorioFeedback");
+
+      if (inicio && fim && inicio > fim) {
+        if (feedback) {
+          feedback.textContent = "O período é inválido: a data de início deve ser anterior ou igual à data de fim.";
+          feedback.classList.add("is-error");
+        }
+        return;
+      }
+
+      if (feedback) {
+        const formatoLabel = formato === "xls" ? "Xls" : (formato === "doc" ? ".doc" : "PDF");
+        feedback.textContent = `A gerar relatório (${formatoLabel})...`;
+        feedback.classList.remove("is-error");
+      }
+
+      gerarRelatorioImprimivel({ tipo, inicio, fim, formato });
+      closeRelatorioModal();
+    });
     $("#btnRelatorioTopo").addEventListener("dblclick", () => gerarRelatorioImprimivel());
 
-    function gerarRelatorioImprimivel(){
-      const rows = state.executadas.map(a => `
+    function filtrarActividadesRelatorio(tipo){
+      if (tipo === "Planificada") return state.cadastradas.filter(a => a.estado === "Planificada");
+      if (tipo === "Cancelada") return state.canceladas;
+      if (tipo === "Todas") return [...state.cadastradas, ...state.executadas, ...state.canceladas];
+      return state.executadas;
+    }
+
+    function dentroDoPeriodo(atividade, inicio, fim){
+      const inicioAtividade = atividade.inicio || "";
+      const fimAtividade = atividade.fim || "";
+      if (inicio && fimAtividade && fimAtividade < inicio) return false;
+      if (fim && inicioAtividade && inicioAtividade > fim) return false;
+      return true;
+    }
+
+    function gerarRelatorioImprimivel(opcoes = {}){
+      const tipo = opcoes.tipo || "Executada";
+      const inicio = opcoes.inicio || "";
+      const fim = opcoes.fim || "";
+      const formato = opcoes.formato || "pdf";
+      const atividades = filtrarActividadesRelatorio(tipo).filter((a) => dentroDoPeriodo(a, inicio, fim));
+
+      const rows = atividades.map(a => `
         <tr>
           <td>${escapeHtml(a.num)}</td>
           <td>${escapeHtml(a.area)}</td>
@@ -552,13 +626,23 @@
       `).join("");
 
       const w = window.open("", "_blank");
+      const tituloTipo =
+        tipo === "Planificada" ? "Actividades Planificadas"
+        : tipo === "Cancelada" ? "Actividades Canceladas"
+        : tipo === "Todas" ? "Todas as Actividades"
+        : "Actividades Executadas";
+      const periodoTexto = inicio || fim
+        ? `${inicio ? new Date(inicio).toLocaleDateString("pt-PT") : "—"} → ${fim ? new Date(fim).toLocaleDateString("pt-PT") : "—"}`
+        : "Todos os períodos";
+      const formatoTexto = formato === "xls" ? "Xls" : (formato === "doc" ? ".doc" : "PDF");
+
       w.document.write(`
         <!doctype html>
         <html lang="pt-PT">
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Relatório — Actividades Executadas (SIGAC)</title>
+          <title>Relatório — ${tituloTipo} (SIGAC)</title>
           <style>
             body{ font-family: Arial, sans-serif; margin: 24px; color:#111827; }
             h1{ font-size: 16px; margin:0; }
@@ -573,15 +657,16 @@
         </head>
         <body>
           <h1>Universidade Rovuma — Direcção Científica</h1>
-          <h2>Relatório de Actividades Executadas (SIGAC) • Faculdade: FACEE • Ano lectivo: 2026</h2>
-          <div class="meta">Total de actividades executadas: <strong>${state.executadas.length}</strong></div>
+          <h2>Relatório de ${tituloTipo} (SIGAC) • Faculdade: FACEE • Ano lectivo: 2026</h2>
+          <div class="meta">Período: <strong>${periodoTexto}</strong> • Tipo de ficheiro seleccionado: <strong>${formatoTexto}</strong></div>
+          <div class="meta">Total de actividades: <strong>${atividades.length}</strong></div>
           <table>
             <thead>
               <tr>
                 <th>Nº</th><th>Área</th><th>Acção</th><th>Período</th><th>Responsável</th><th>Orçamento</th><th>Evidências</th>
               </tr>
             </thead>
-            <tbody>${rows || `<tr><td colspan="7">Sem registos de actividades executadas.</td></tr>`}</tbody>
+            <tbody>${rows || `<tr><td colspan="7">Sem registos para os filtros seleccionados.</td></tr>`}</tbody>
           </table>
           <div class="foot">Gerado pelo SIGAC (demo). Para exportar em PDF, use “Imprimir” do navegador.</div>
           <button onclick="window.print()">Imprimir / Guardar em PDF</button>
