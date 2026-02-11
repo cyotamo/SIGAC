@@ -1,5 +1,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
 
     const API_URL = "https://script.google.com/macros/s/AKfycbxh13QZ0OfmMWdZHFCDv7KYrfFUb8xKdjLJN2gdzDx53al7Y56NM8K9y8ttoXLsQatb/exec";
 
@@ -17,7 +18,7 @@
     let utilizadorEmail = "";
 
     function obterEmailUtilizador() {
-      const email = auth.currentUser?.email || utilizadorEmail;
+      const email = normalizarEmail(auth.currentUser?.email || utilizadorEmail);
       if (!email) {
         throw new Error("Sessão expirada. Faça login novamente.");
       }
@@ -27,7 +28,8 @@
     function atualizarContextoUtilizador(email) {
       const el = document.getElementById("ctx");
       if (!el) return;
-      el.innerHTML = `Faculdade: <strong>FACEE</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(email)}</strong>`;
+      const faculdade = faculdadePorEmail(email) || "N/D";
+      el.innerHTML = `Faculdade: <strong>${faculdade}</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(email)}</strong>`;
     }
 
     onAuthStateChanged(auth, (user) => {
@@ -36,7 +38,14 @@
         return;
       }
 
-      utilizadorEmail = user.email || "";
+      utilizadorEmail = normalizarEmail(user.email);
+      if (!emailAutorizado(utilizadorEmail)) {
+        signOut(auth).finally(() => {
+          window.location.href = "index.html";
+        });
+        return;
+      }
+
       if (utilizadorEmail) {
         atualizarContextoUtilizador(utilizadorEmail);
       }
