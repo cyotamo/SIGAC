@@ -307,7 +307,12 @@
           <div class="field span2">
             <label>Evidências (ficheiros)</label>
             <input id="mFicheiros" type="file" multiple />
-            <div class="mini">Nesta demo, os ficheiros não são carregados; fica apenas registado “X ficheiros seleccionados”.</div>
+            <div class="mini">Ao actualizar, o primeiro ficheiro seleccionado é convertido para base64 e enviado para o backend.</div>
+          </div>
+
+          <div class="field span2">
+            <label for="mEvidenciaUrl">Link da evidência (opcional)</label>
+            <input id="mEvidenciaUrl" type="url" placeholder="https://..." />
           </div>
 
           <div class="field span2">
@@ -320,6 +325,7 @@
 
         <div class="row">
           <span class="mini" id="mInfo"></span>
+          <span id="modalFeedback" class="inline-feedback" role="status" aria-live="polite"></span>
           <button class="btn" id="btnGuardarModal">Guardar alterações</button>
         </div>
       </div>
