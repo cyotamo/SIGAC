@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -50,6 +51,18 @@ function mostrarErro(mensagem) {
 
 const form = document.querySelector(".form");
 
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+
+  if (user.email?.toLowerCase() === EMAIL_AUTORIZADO) {
+    window.location.href = "faculdades.html";
+    return;
+  }
+
+  await signOut(auth);
+  mostrarErro("Utilizador autenticado, mas sem permissão para aceder a esta área.");
+});
+
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -62,9 +75,10 @@ form?.addEventListener("submit", async (event) => {
   }
 
   try {
-    const credenciais = await signInWithEmailAndPassword(auth, email, senha);
+    await signInWithEmailAndPassword(auth, email, senha);
 
-    if (credenciais.user.email?.toLowerCase() === EMAIL_AUTORIZADO) {
+    const user = auth.currentUser;
+    if (user?.email?.toLowerCase() === EMAIL_AUTORIZADO) {
       window.location.href = "faculdades.html";
       return;
     }

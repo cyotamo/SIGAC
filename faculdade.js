@@ -1,9 +1,52 @@
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
     const API_URL = "https://script.google.com/macros/s/AKfycbxh13QZ0OfmMWdZHFCDv7KYrfFUb8xKdjLJN2gdzDx53al7Y56NM8K9y8ttoXLsQatb/exec";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-z5eNHi-rosi0Ak64bPeQZU-6oJA9DDk",
+      authDomain: "sigacur00.firebaseapp.com",
+      projectId: "sigacur00",
+      storageBucket: "sigacur00.firebasestorage.app",
+      messagingSenderId: "224944945440",
+      appId: "1:224944945440:web:743589f8f137d25d44ff45"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    let utilizadorEmail = "";
+
+    function obterEmailUtilizador() {
+      const email = auth.currentUser?.email || utilizadorEmail;
+      if (!email) {
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
+      return email;
+    }
+
+    function atualizarContextoUtilizador(email) {
+      const el = document.getElementById("ctx");
+      if (!el) return;
+      el.innerHTML = `Faculdade: <strong>FACEE</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(email)}</strong>`;
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      utilizadorEmail = user.email || "";
+      if (utilizadorEmail) {
+        atualizarContextoUtilizador(utilizadorEmail);
+      }
+    });
 
     // ---------------------------
     // DEMO DATA / STATE
     function normalizarParaAPI(a) {
       return {
+        email: obterEmailUtilizador(),
         id: a.id,
         dataRegisto: a.createdAt || "",
         area: a.area,
@@ -70,6 +113,7 @@
     }
 
     async function atualizarAtividade(payload) {
+      payload.email = obterEmailUtilizador();
       console.log("PAYLOAD atualizar ->", payload);
 
       const res = await fetch(API_URL, {
@@ -583,6 +627,7 @@
 
       const payload = {
         acao: "gerar_relatorio",
+        email: obterEmailUtilizador(),
         formato: formatoBack,
         opcao: normalizarOpcaoRelatorioFront_(tipo),
         porPeriodo,
