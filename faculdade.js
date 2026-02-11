@@ -59,12 +59,17 @@
     // ---------------------------
     // DEMO DATA / STATE
     function normalizarParaAPI(a) {
+      const email = obterEmailUtilizador();
+      const siglaFaculdade = email.split("@")[0].toUpperCase();
+
       return {
-        email: obterEmailUtilizador(),
+        acao: "criar",
+        email,
+        siglaFaculdade,
         id: a.id,
         dataRegisto: a.createdAt || "",
         area: a.area,
-        acao: a.accao,
+        accao: a.accao,
         objectivos: a.obj,
         localizacao: a.local,
         indicador: a.indicador,
