@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { emailAutorizado } from "./autorizacao.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,8 +21,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-
-const EMAIL_AUTORIZADO = "facee@unirovuma.ac.mz";
 
 window.addEventListener("load", () => {
   const emailInput = document.getElementById("email");
@@ -54,7 +53,7 @@ const form = document.querySelector(".form");
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
-  if (user.email?.toLowerCase() === EMAIL_AUTORIZADO) {
+  if (emailAutorizado(user.email)) {
     window.location.href = "faculdades.html";
     return;
   }
@@ -78,7 +77,7 @@ form?.addEventListener("submit", async (event) => {
     await signInWithEmailAndPassword(auth, email, senha);
 
     const user = auth.currentUser;
-    if (user?.email?.toLowerCase() === EMAIL_AUTORIZADO) {
+    if (emailAutorizado(user?.email)) {
       window.location.href = "faculdades.html";
       return;
     }
