@@ -1,5 +1,5 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const API_URL = "https://script.google.com/macros/s/AKfycbxh13QZ0OfmMWdZHFCDv7KYrfFUb8xKdjLJN2gdzDx53al7Y56NM8K9y8ttoXLsQatb/exec";
 
@@ -40,6 +40,11 @@
       if (utilizadorEmail) {
         atualizarContextoUtilizador(utilizadorEmail);
       }
+    });
+
+    document.getElementById("btnLogout")?.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
     });
 
     // ---------------------------
