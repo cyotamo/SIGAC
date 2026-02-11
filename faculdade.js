@@ -562,10 +562,79 @@
       state.canceladas = state.canceladas.filter(x => x.id !== id);
     }
 
+    async function gerarRelatorioViaAPI({ tipo, inicio, fim, formato }) {
+      const feedback = $("#relatorioFeedback");
+
+      const formatoBack = (formato === "xls") ? "xlsx" : formato;
+      const porPeriodo = Boolean(inicio && fim);
+
+      const payload = {
+        acao: "gerar_relatorio",
+        formato: formatoBack,
+        opcao: tipo,
+        porPeriodo,
+        dataInicio: porPeriodo ? inicio : undefined,
+        dataFim: porPeriodo ? fim : undefined,
+        titulo: "Relatório de Actividades"
+      };
+
+      Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
+      const url = `${API_URL}?acao=gerar_relatorio`;
+
+      let res;
+      let data;
+      try {
+        res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const txt = await res.text();
+        data = JSON.parse(txt);
+      } catch (err) {
+        if (feedback) {
+          feedback.textContent = "Falha de rede ao gerar relatório. Verifica a ligação e tenta novamente.";
+          feedback.classList.add("is-error");
+        }
+        console.error("Erro de rede:", err);
+        return false;
+      }
+
+      if (!res.ok || !data || data.sucesso !== true) {
+        const msg = (data && data.mensagem) ? data.mensagem : `Erro HTTP ${res.status}`;
+        if (feedback) {
+          feedback.textContent = msg;
+          feedback.classList.add("is-error");
+        }
+        console.error("Erro ao gerar relatório:", data);
+        return false;
+      }
+
+      const fileUrl = data?.ficheiro?.url;
+      if (!fileUrl) {
+        if (feedback) {
+          feedback.textContent = "Relatório gerado, mas não foi devolvido o link do ficheiro.";
+          feedback.classList.add("is-error");
+        }
+        console.error("Sem ficheiro.url:", data);
+        return false;
+      }
+
+      if (feedback) {
+        feedback.textContent = "Relatório gerado com sucesso. A abrir...";
+        feedback.classList.remove("is-error");
+      }
+
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+      return true;
+    }
+
     // ---------------------------
-    // Relatório: imprimir HTML
+    // Relatório
     // ---------------------------
-    $("#btnGerarRelatorioModal").addEventListener("click", () => {
+    $("#btnGerarRelatorioModal").addEventListener("click", async () => {
       const tipo = $("#relatorioTipo").value;
       const inicio = $("#relatorioInicio").value;
       const fim = $("#relatorioFim").value;
@@ -586,8 +655,8 @@
         feedback.classList.remove("is-error");
       }
 
-      gerarRelatorioImprimivel({ tipo, inicio, fim, formato });
-      closeRelatorioModal();
+      const sucesso = await gerarRelatorioViaAPI({ tipo, inicio, fim, formato });
+      if (sucesso) closeRelatorioModal();
     });
     $("#btnRelatorioTopo").addEventListener("dblclick", () => gerarRelatorioImprimivel());
 
