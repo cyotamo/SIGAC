@@ -750,17 +750,15 @@ body.gestor-page .gestor-tab.active {
   background: #2563eb;
 }
 
-body.gestor-page .gestor-relatorios-enviados {
-  margin-left: auto;
-  min-width: 170px;
+body.gestor-page .gestor-tab-static {
   border: 1px solid #bfdbfe;
-  background: #eff6ff;
+  background: #fff;
+  color: #0f172a;
   border-radius: 10px;
-  padding: 7px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 8px 12px;
   font-size: 13px;
+  font-weight: 800;
+  cursor: default;
 }
 
 body.gestor-page .gestor-layout {

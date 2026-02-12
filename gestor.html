@@ -42,20 +42,12 @@
       </section>
 
       <section class="gestor-card">
-        <div class="gestor-card-head">
-          <h2>Actividades da Faculdade</h2>
-          <p id="gestorResumo">Sem faculdade seleccionada.</p>
-        </div>
-
         <div class="gestor-estado-actions" role="tablist" aria-label="Filtro de estado">
+          <button class="tab gestor-tab-static" type="button">Cadastro</button>
           <button class="tab gestor-tab active" data-estado="Planificada" aria-selected="true">Planificadas</button>
           <button class="tab gestor-tab" data-estado="Executada" aria-selected="false">Executadas</button>
           <button class="tab gestor-tab" data-estado="Cancelada" aria-selected="false">Canceladas</button>
-
-          <div class="gestor-relatorios-enviados" aria-live="polite">
-            <span>Relatórios enviados</span>
-            <strong id="totalRelatoriosEnviados">0</strong>
-          </div>
+          <button class="tab gestor-tab-static" id="btnEstatisticas" type="button">Estatisticas</button>
         </div>
 
         <div class="table-wrap">
