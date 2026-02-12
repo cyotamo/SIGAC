@@ -8,41 +8,36 @@
 </head>
 <body class="gestor-page">
   <div class="gestor-app">
-    <header class="gestor-topbar">
-      <div>
-        <p class="gestor-kicker">Universidade Rovuma</p>
-        <h1>Monitoria de Actividades das Faculdades</h1>
-        <p class="gestor-sub">Direcção Científica — acompanhamento do plano, execução e cancelamento.</p>
+    <header class="topbar gestor-topbar">
+      <div class="brand">
+        <div class="logo">SIGAC</div>
+        <div style="min-width:0">
+          <h1>Monitoria de Actividades das Faculdades</h1>
+          <p id="ctxGestor">Direcção Científica: <strong>direccao.cientifica@unirovuma.ac.mz</strong> • Ano lectivo: <strong>2026</strong></p>
+        </div>
       </div>
-      <span class="gestor-pill">Sessão: Gestor Científico</span>
+
+      <div class="actions">
+        <span class="pill"><span class="dot"></span> Sessão: Direcção Científica</span>
+        <button class="btn-ghost" id="btnLogoutGestor" type="button">Terminar Sessão</button>
+      </div>
     </header>
 
     <main class="gestor-layout">
       <section class="gestor-card">
         <div class="gestor-card-head">
           <h2>Filtro da Faculdade</h2>
-          <p>Seleccione a faculdade para visualizar as actividades monitoradas.</p>
-        </div>
-        <div class="gestor-filter-row">
-          <label for="faculdadeSelect">Faculdade</label>
-          <select id="faculdadeSelect">
-            <option value="">Escolha a faculdade...</option>
-          </select>
+          <p>Seleccione uma faculdade e clique em buscar para monitorar actividades.</p>
         </div>
 
-        <div class="gestor-stats" aria-live="polite">
-          <article class="stat-card">
-            <h3>Planificadas</h3>
-            <strong id="totalPlanificadas">0</strong>
-          </article>
-          <article class="stat-card ok">
-            <h3>Executadas</h3>
-            <strong id="totalExecutadas">0</strong>
-          </article>
-          <article class="stat-card bad">
-            <h3>Canceladas</h3>
-            <strong id="totalCanceladas">0</strong>
-          </article>
+        <div class="gestor-filter-inline">
+          <div class="gestor-filter-row">
+            <label for="faculdadeSelect">Faculdade</label>
+            <select id="faculdadeSelect">
+              <option value="">Escolha a faculdade...</option>
+            </select>
+          </div>
+          <button id="btnBuscarFaculdade" class="btn" type="button">Buscar Faculdade</button>
         </div>
       </section>
 
@@ -50,6 +45,17 @@
         <div class="gestor-card-head">
           <h2>Actividades da Faculdade</h2>
           <p id="gestorResumo">Sem faculdade seleccionada.</p>
+        </div>
+
+        <div class="gestor-estado-actions" role="tablist" aria-label="Filtro de estado">
+          <button class="tab gestor-tab active" data-estado="Planificada" aria-selected="true">Planificadas</button>
+          <button class="tab gestor-tab" data-estado="Executada" aria-selected="false">Executadas</button>
+          <button class="tab gestor-tab" data-estado="Cancelada" aria-selected="false">Canceladas</button>
+
+          <div class="gestor-relatorios-enviados" aria-live="polite">
+            <span>Relatórios enviados</span>
+            <strong id="totalRelatoriosEnviados">0</strong>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -75,7 +81,7 @@
       <section class="gestor-card">
         <div class="gestor-card-head">
           <h2>Gerar Relatórios</h2>
-          <p>Emita relatórios resumidos conforme o estado das actividades.</p>
+          <p>A Direcção Científica apenas monitora e gera relatórios/estatísticas.</p>
         </div>
 
         <div class="gestor-report-actions">
@@ -83,9 +89,10 @@
           <button id="btnRelatorioPlanificadas" class="btn-ghost">Relatório Planificadas</button>
           <button id="btnRelatorioExecutadas" class="btn-ghost">Relatório Executadas</button>
           <button id="btnRelatorioCanceladas" class="btn-ghost">Relatório Canceladas</button>
+          <button id="btnDadosEstatisticos" class="btn-ghost" type="button">Gerar Dados Estatísticos</button>
         </div>
 
-        <pre id="relatorioSaida" class="gestor-report-output">Selecione uma faculdade e clique num botão para gerar o relatório.</pre>
+        <pre id="relatorioSaida" class="gestor-report-output">Selecione uma faculdade, clique em buscar e depois gere os relatórios.</pre>
       </section>
     </main>
   </div>

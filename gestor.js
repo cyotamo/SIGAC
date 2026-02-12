@@ -16,23 +16,27 @@ const dadosFaculdades = {
 };
 
 const faculdadeSelect = document.getElementById("faculdadeSelect");
+const btnBuscarFaculdade = document.getElementById("btnBuscarFaculdade");
 const tabelaGestorActividades = document.getElementById("tabelaGestorActividades");
 const resumo = document.getElementById("gestorResumo");
-const totalPlanificadas = document.getElementById("totalPlanificadas");
-const totalExecutadas = document.getElementById("totalExecutadas");
-const totalCanceladas = document.getElementById("totalCanceladas");
+const totalRelatoriosEnviados = document.getElementById("totalRelatoriosEnviados");
 const relatorioSaida = document.getElementById("relatorioSaida");
+const botoesEstado = Array.from(document.querySelectorAll(".gestor-tab"));
 
 const botoesRelatorio = {
   geral: document.getElementById("btnRelatorioGeral"),
   planificada: document.getElementById("btnRelatorioPlanificadas"),
   executada: document.getElementById("btnRelatorioExecutadas"),
-  cancelada: document.getElementById("btnRelatorioCanceladas")
+  cancelada: document.getElementById("btnRelatorioCanceladas"),
+  estatisticas: document.getElementById("btnDadosEstatisticos")
 };
 
+let faculdadeActual = "";
+let estadoActual = "Planificada";
+let contadorRelatorios = 0;
+
 function carregarFaculdades() {
-  const faculdades = Object.keys(dadosFaculdades);
-  faculdades.forEach((sigla) => {
+  Object.keys(dadosFaculdades).forEach((sigla) => {
     const option = document.createElement("option");
     option.value = sigla;
     option.textContent = sigla;
@@ -46,27 +50,32 @@ function classEstado(estado) {
   return "chip";
 }
 
-function actualizarPainel(sigla) {
-  if (!sigla || !dadosFaculdades[sigla]) {
+function actualizarTabs(estado) {
+  botoesEstado.forEach((botao) => {
+    const activo = botao.dataset.estado === estado;
+    botao.classList.toggle("active", activo);
+    botao.setAttribute("aria-selected", String(activo));
+  });
+}
+
+function actualizarPainel() {
+  if (!faculdadeActual || !dadosFaculdades[faculdadeActual]) {
     tabelaGestorActividades.innerHTML = '<tr><td colspan="5" class="empty-cell">Seleccione uma faculdade para iniciar a monitoria.</td></tr>';
     resumo.textContent = "Sem faculdade seleccionada.";
-    totalPlanificadas.textContent = "0";
-    totalExecutadas.textContent = "0";
-    totalCanceladas.textContent = "0";
     return;
   }
 
-  const actividades = dadosFaculdades[sigla];
-  const planificadas = actividades.filter((item) => item.estado === "Planificada").length;
-  const executadas = actividades.filter((item) => item.estado === "Executada").length;
-  const canceladas = actividades.filter((item) => item.estado === "Cancelada").length;
+  const actividades = dadosFaculdades[faculdadeActual];
+  const filtradas = actividades.filter((item) => item.estado === estadoActual);
 
-  totalPlanificadas.textContent = String(planificadas);
-  totalExecutadas.textContent = String(executadas);
-  totalCanceladas.textContent = String(canceladas);
-  resumo.textContent = `${sigla}: ${actividades.length} actividade(s) registada(s).`;
+  resumo.textContent = `${faculdadeActual}: ${filtradas.length} actividade(s) ${estadoActual.toLowerCase()}(s).`;
 
-  tabelaGestorActividades.innerHTML = actividades
+  if (!filtradas.length) {
+    tabelaGestorActividades.innerHTML = '<tr><td colspan="5" class="empty-cell">Sem actividades para o filtro seleccionado.</td></tr>';
+    return;
+  }
+
+  tabelaGestorActividades.innerHTML = filtradas
     .map(
       (item, index) => `
       <tr>
@@ -81,17 +90,22 @@ function actualizarPainel(sigla) {
     .join("");
 }
 
-function gerarRelatorio(sigla, estado) {
-  if (!sigla || !dadosFaculdades[sigla]) {
-    relatorioSaida.textContent = "Escolha uma faculdade antes de gerar relatório.";
+function registarRelatorioGerado() {
+  contadorRelatorios += 1;
+  totalRelatoriosEnviados.textContent = String(contadorRelatorios);
+}
+
+function gerarRelatorio(estado) {
+  if (!faculdadeActual || !dadosFaculdades[faculdadeActual]) {
+    relatorioSaida.textContent = "Escolha uma faculdade e clique em buscar antes de gerar relatório.";
     return;
   }
 
-  const actividades = dadosFaculdades[sigla];
+  const actividades = dadosFaculdades[faculdadeActual];
   const lista = estado ? actividades.filter((item) => item.estado === estado) : actividades;
 
   const cabecalho = [
-    `RELATÓRIO SIGAC - ${sigla}`,
+    `RELATÓRIO SIGAC - ${faculdadeActual}`,
     `Data: ${new Date().toLocaleDateString("pt-PT")}`,
     `Filtro: ${estado || "Geral"}`,
     ""
@@ -102,17 +116,36 @@ function gerarRelatorio(sigla, estado) {
     : ["Sem actividades para o filtro seleccionado."];
 
   relatorioSaida.textContent = [...cabecalho, ...linhas].join("\n");
+  registarRelatorioGerado();
 }
 
-faculdadeSelect.addEventListener("change", (event) => {
-  actualizarPainel(event.target.value);
-  relatorioSaida.textContent = "Clique num botão para gerar o relatório da faculdade seleccionada.";
+btnBuscarFaculdade.addEventListener("click", () => {
+  faculdadeActual = faculdadeSelect.value;
+  actualizarPainel();
+  relatorioSaida.textContent = "Faculdade carregada. Agora já pode gerar relatórios e dados estatísticos.";
 });
 
-botoesRelatorio.geral.addEventListener("click", () => gerarRelatorio(faculdadeSelect.value));
-botoesRelatorio.planificada.addEventListener("click", () => gerarRelatorio(faculdadeSelect.value, "Planificada"));
-botoesRelatorio.executada.addEventListener("click", () => gerarRelatorio(faculdadeSelect.value, "Executada"));
-botoesRelatorio.cancelada.addEventListener("click", () => gerarRelatorio(faculdadeSelect.value, "Cancelada"));
+botoesEstado.forEach((botao) => {
+  botao.addEventListener("click", () => {
+    estadoActual = botao.dataset.estado;
+    actualizarTabs(estadoActual);
+    actualizarPainel();
+  });
+});
+
+botoesRelatorio.geral.addEventListener("click", () => gerarRelatorio());
+botoesRelatorio.planificada.addEventListener("click", () => gerarRelatorio("Planificada"));
+botoesRelatorio.executada.addEventListener("click", () => gerarRelatorio("Executada"));
+botoesRelatorio.cancelada.addEventListener("click", () => gerarRelatorio("Cancelada"));
+botoesRelatorio.estatisticas.addEventListener("click", () => {
+  if (!faculdadeActual || !dadosFaculdades[faculdadeActual]) {
+    relatorioSaida.textContent = "Escolha uma faculdade e clique em buscar para gerar dados estatísticos.";
+    return;
+  }
+
+  relatorioSaida.textContent = "Botão de geração de dados estatísticos preparado. A lógica será adicionada na próxima etapa.";
+});
 
 carregarFaculdades();
-actualizarPainel("");
+actualizarTabs(estadoActual);
+actualizarPainel();

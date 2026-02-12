@@ -636,6 +636,133 @@ body.gestor-page .gestor-pill {
   background: #eff6ff;
 }
 
+
+body.gestor-page .topbar {
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(219,234,254,.95);
+  box-shadow: var(--shadow);
+  border-radius: 24px;
+  padding: 14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+body.gestor-page .brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+body.gestor-page .logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display:grid;
+  place-items:center;
+  font-weight: 900;
+  color: var(--blue2);
+  background: linear-gradient(135deg, rgba(43,108,176,.16), rgba(96,165,250,.22));
+  border: 1px solid rgba(219,234,254,.95);
+}
+
+body.gestor-page .brand h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+body.gestor-page .brand p {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+body.gestor-page .actions {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+body.gestor-page .pill {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0b3a77;
+  background: rgba(219,234,254,.85);
+  border: 1px solid rgba(191,219,254,.95);
+  padding: 6px 10px;
+  border-radius: 999px;
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+}
+
+body.gestor-page .dot { width:8px;height:8px;border-radius:50%; background: var(--blue); box-shadow:0 0 0 4px rgba(96,165,250,.18); }
+
+body.gestor-page .btn,
+body.gestor-page .btn-ghost {
+  margin-top: 0;
+}
+
+body.gestor-page .btn-ghost {
+  border:1px solid rgba(219,234,254,.95);
+  background:#fff;
+  color:#0f172a;
+  border-radius:12px;
+  padding: 9px 12px;
+  font-weight: 800;
+  font-size: 12.5px;
+  cursor:pointer;
+}
+
+body.gestor-page .gestor-filter-inline {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.gestor-page .gestor-estado-actions {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.gestor-page .gestor-tab {
+  border: 1px solid #bfdbfe;
+  background: #fff;
+  color: #1e3a8a;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+body.gestor-page .gestor-tab.active {
+  color: #fff;
+  border-color: #1d4ed8;
+  background: #2563eb;
+}
+
+body.gestor-page .gestor-relatorios-enviados {
+  margin-left: auto;
+  min-width: 170px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  border-radius: 10px;
+  padding: 7px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
 body.gestor-page .gestor-layout {
   display: grid;
   gap: 14px;
