@@ -25,17 +25,45 @@
       return email;
     }
 
+    function guardarContextoLogin(contexto = {}) {
+      Object.entries(contexto).forEach(([chave, valor]) => {
+        localStorage.setItem(chave, String(valor ?? ""));
+      });
+    }
+
+    function obterContextoLogin(email, faculdadeOverride) {
+      const emailNormalizado = normalizarEmail(email);
+      const faculdadeGuardada = localStorage.getItem("faculdade") || "";
+      const anoLectivoGuardado = localStorage.getItem("anoLectivo") || "2026";
+      const utilizadorGuardado = normalizarEmail(localStorage.getItem("utilizador") || emailNormalizado);
+      const seccaoGuardada = localStorage.getItem("seccao") || "";
+
+      const faculdade = faculdadeOverride || faculdadeGuardada || faculdadePorEmail(emailNormalizado) || "N/D";
+      const contexto = {
+        faculdade,
+        anoLectivo: anoLectivoGuardado,
+        utilizador: utilizadorGuardado || emailNormalizado,
+        seccao: seccaoGuardada || faculdade
+      };
+
+      guardarContextoLogin(contexto);
+      return contexto;
+    }
+
     function atualizarContextoUtilizador(email) {
       const el = document.getElementById("ctx");
       if (!el) return;
-      const faculdade = faculdadePorEmail(email) || "N/D";
-      el.innerHTML = `Faculdade: <strong>${faculdade}</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(email)}</strong>`;
+
+      const contexto = obterContextoLogin(email);
+      el.textContent = `Faculdade: ${contexto.faculdade} • Ano lectivo: ${contexto.anoLectivo} • Utilizador: ${contexto.utilizador} • Secção: ${contexto.seccao}`;
     }
 
     function atualizarContextoFaculdade(nomeFaculdade) {
       const el = document.getElementById("ctx");
       if (!el) return;
-      el.innerHTML = `Faculdade: <strong>${escapeHtml(nomeFaculdade || "N/D")}</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(obterEmailUtilizador())}</strong>`;
+
+      const contexto = obterContextoLogin(obterEmailUtilizador(), nomeFaculdade || undefined);
+      el.textContent = `Faculdade: ${contexto.faculdade} • Ano lectivo: ${contexto.anoLectivo} • Utilizador: ${contexto.utilizador} • Secção: ${contexto.seccao}`;
     }
 
     function preencherFiltroFaculdades() {

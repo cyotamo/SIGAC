@@ -6,7 +6,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { emailAutorizado } from "./autorizacao.js";
+import { emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,6 +21,47 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+const ANO_LECTIVO = "2026";
+
+function obterDestinoPosLogin(email) {
+  const emailNormalizado = normalizarEmail(email);
+  if (emailNormalizado === "dc@unirovuma.ac.mz") {
+    return {
+      pagina: "gestor.html",
+      contexto: {
+        faculdade: "DC",
+        anoLectivo: ANO_LECTIVO,
+        utilizador: "dc@unirovuma.ac.mz",
+        seccao: "DC"
+      }
+    };
+  }
+
+  const faculdade = faculdadePorEmail(emailNormalizado) || "N/D";
+
+  return {
+    pagina: "faculdades.html",
+    contexto: {
+      faculdade,
+      anoLectivo: ANO_LECTIVO,
+      utilizador: emailNormalizado,
+      seccao: faculdade
+    }
+  };
+}
+
+function guardarContextoLogin(contexto = {}) {
+  Object.entries(contexto).forEach(([chave, valor]) => {
+    localStorage.setItem(chave, String(valor ?? ""));
+  });
+}
+
+function redirecionarPosLogin(email) {
+  const { pagina, contexto } = obterDestinoPosLogin(email);
+  guardarContextoLogin(contexto);
+  window.location.href = pagina;
+}
 
 window.addEventListener("load", () => {
   const emailInput = document.getElementById("email");
@@ -54,7 +95,7 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
   if (emailAutorizado(user.email)) {
-    window.location.href = "faculdades.html";
+    redirecionarPosLogin(user.email);
     return;
   }
 
@@ -78,7 +119,7 @@ form?.addEventListener("submit", async (event) => {
 
     const user = auth.currentUser;
     if (emailAutorizado(user?.email)) {
-      window.location.href = "faculdades.html";
+      redirecionarPosLogin(user.email);
       return;
     }
 
