@@ -670,13 +670,21 @@ body.gestor-page .logo {
 
 body.gestor-page .brand h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 body.gestor-page .brand p {
   margin: 3px 0 0;
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 12.5px;
+  color: var(--muted2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 body.gestor-page .actions {
@@ -710,10 +718,10 @@ body.gestor-page .btn-ghost {
 body.gestor-page .btn-ghost {
   border:1px solid rgba(219,234,254,.95);
   background:#fff;
-  color:#0f172a;
+  color: var(--text);
   border-radius:12px;
   padding: 9px 12px;
-  font-weight: 800;
+  font-weight: 900;
   font-size: 12.5px;
   cursor:pointer;
 }
