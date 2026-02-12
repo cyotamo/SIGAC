@@ -43,12 +43,13 @@
 
       <section class="gestor-card">
         <div class="gestor-estado-actions" role="tablist" aria-label="Filtro de estado">
-          <button class="tab gestor-tab-static" type="button">Cadastro</button>
           <button class="tab gestor-tab active" data-estado="Planificada" aria-selected="true">Planificadas</button>
           <button class="tab gestor-tab" data-estado="Executada" aria-selected="false">Executadas</button>
           <button class="tab gestor-tab" data-estado="Cancelada" aria-selected="false">Canceladas</button>
-          <button class="tab gestor-tab-static" id="btnEstatisticas" type="button">Estatisticas</button>
+          <button class="tab gestor-tab" id="btnEstatisticas" type="button">Estatisticas</button>
         </div>
+
+        <div id="gestorStats" class="gestor-stats" hidden></div>
 
         <div class="table-wrap">
           <table>
