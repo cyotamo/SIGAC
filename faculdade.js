@@ -520,6 +520,8 @@
 
       if (btnEnviarDc) {
         btnEnviarDc.hidden = !mostrar;
+        btnEnviarDc.disabled = !mostrar;
+        btnEnviarDc.textContent = "Enviar à DC";
       }
     }
 
@@ -548,11 +550,52 @@
       window.open(relatorioGeradoUrl, "_blank", "noopener,noreferrer");
     });
 
-    $("#btnEnviarRelatorioDc")?.addEventListener("click", () => {
+    $("#btnEnviarRelatorioDc")?.addEventListener("click", async () => {
       const feedback = $("#relatorioFeedback");
-      if (feedback) {
-        feedback.textContent = "Envio para a DC disponível em breve.";
-        feedback.classList.remove("is-error");
+      const btnEnviarRelatorioDc = $("#btnEnviarRelatorioDc");
+
+      try {
+        const email = obterEmailUtilizador().trim().toLowerCase();
+        if (!email) throw new Error("Sessão sem email.");
+
+        const relatorioUrl = String(relatorioGeradoUrl || "").trim();
+        if (!relatorioUrl) throw new Error("Relatório ainda não foi gerado.");
+
+        if (feedback) {
+          feedback.textContent = "A enviar à DC...";
+          feedback.classList.remove("is-error");
+        }
+
+        const resp = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            operacao: "enviar_relatorio_dc",
+            email,
+            relatorioUrl
+          })
+        });
+
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data?.sucesso) {
+          throw new Error(data?.mensagem || `HTTP ${resp.status}`);
+        }
+
+        if (feedback) {
+          feedback.textContent = data.mensagem || "Enviado à DC com sucesso.";
+          feedback.classList.remove("is-error");
+        }
+
+        if (btnEnviarRelatorioDc) {
+          btnEnviarRelatorioDc.disabled = true;
+          btnEnviarRelatorioDc.textContent = "Enviado";
+        }
+      } catch (err) {
+        console.error(err);
+        if (feedback) {
+          feedback.textContent = err?.message || "Erro ao enviar relatório.";
+          feedback.classList.add("is-error");
+        }
       }
     });
 
