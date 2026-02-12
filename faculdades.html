@@ -21,25 +21,14 @@
 
       <div class="actions">
         <span class="pill"><span class="dot"></span> Sessão: Faculdade</span>
+        <button class="btn-ghost" id="btnDemo">Carregar demo</button>
+        <button class="btn" id="btnRelatorioTopo">Estatisticas (Executadas)</button>
         <button class="btn-ghost" id="btnLogout" type="button">Terminar Sessão</button>
       </div>
     </header>
 
     <div class="main">
       <section class="card content">
-        <div class="card-b">
-          <div class="grid">
-            <div class="field">
-              <label for="filtroFaculdade">Filtrar por faculdade</label>
-              <select id="filtroFaculdade"></select>
-            </div>
-            <div class="field">
-              <label>&nbsp;</label>
-              <button class="btn-ghost" id="btnAplicarFiltroFaculdade" type="button">Filtrar</button>
-            </div>
-          </div>
-        </div>
-
         <div class="tabs" role="tablist" aria-label="Menu de gestão">
           <button class="tab" id="tab-cadastro" role="tab" aria-selected="true" aria-controls="pane-cadastro" data-tab="cadastro">
             Cadastro
@@ -53,11 +42,8 @@
           <button class="tab" id="tab-canceladas" role="tab" aria-selected="false" aria-controls="pane-canceladas" data-tab="canceladas">
             Canceladas
           </button>
-          <button class="tab" id="tab-estatisticas" role="tab" aria-selected="false" aria-controls="pane-estatisticas" data-tab="estatisticas">
+          <button class="tab" id="tab-relatorio" role="tab" aria-selected="false" aria-controls="pane-relatorio" data-tab="relatorio">
             Estatisticas
-          </button>
-          <button class="tab" id="tab-relatorios-enviados" role="tab" aria-selected="false" aria-controls="pane-relatorios-enviados" data-tab="relatorios-enviados">
-            Relatorios enviados
           </button>
         </div>
 
@@ -246,32 +232,8 @@
           </div>
         </div>
 
-        <!-- Pane: Estatísticas -->
-        <div class="pane" id="pane-estatisticas" role="tabpanel" aria-labelledby="tab-estatisticas" hidden>
-          <div class="card-b">
-            <div class="grid cols-4">
-              <div class="field">
-                <label>Total planificadas</label>
-                <input id="statPlanificadas" readonly />
-              </div>
-              <div class="field">
-                <label>Total executadas</label>
-                <input id="statExecutadas" readonly />
-              </div>
-              <div class="field">
-                <label>Total canceladas</label>
-                <input id="statCanceladas" readonly />
-              </div>
-              <div class="field">
-                <label>Orçamento executado</label>
-                <input id="statOrcamento" readonly />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pane: Relatórios enviados -->
-        <div class="pane" id="pane-relatorios-enviados" role="tabpanel" aria-labelledby="tab-relatorios-enviados" hidden>
+        <!-- Pane: Relatório -->
+        <div class="pane" id="pane-relatorio" role="tabpanel" aria-labelledby="tab-relatorio" hidden>
           <div class="card-b">
             <div class="help">
               Aqui vais gerar o <strong>relatório das actividades executadas</strong>. Nesta versão (demo), é gerado um relatório em HTML pronto para imprimir/guardar em PDF.
