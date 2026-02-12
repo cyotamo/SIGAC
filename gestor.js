@@ -66,6 +66,12 @@
       el.textContent = `Faculdade: ${contexto.faculdade} • Ano lectivo: ${contexto.anoLectivo} • Utilizador: ${contexto.utilizador} • Secção: ${contexto.seccao}`;
     }
 
+    function setCtxLoading(isLoading, faculdade = "") {
+      const status = document.getElementById("statusCarregamento");
+      if (!status) return;
+      status.textContent = isLoading ? `A carregar dados de ${faculdade || "faculdade"}...` : "";
+    }
+
     function preencherFiltroFaculdades() {
       const filtro = document.getElementById("filtroFaculdade");
       if (!filtro) return;
@@ -102,9 +108,21 @@
       }
     });
 
-    document.getElementById("btnAplicarFiltroFaculdade")?.addEventListener("click", () => {
-      const faculdade = document.getElementById("filtroFaculdade")?.value || "";
-      atualizarContextoFaculdade(faculdade);
+    document.getElementById("btnAplicarFiltroFaculdade")?.addEventListener("click", async () => {
+      try {
+        const faculdade = document.getElementById("filtroFaculdade")?.value || "";
+        if (!faculdade) return;
+
+        atualizarContextoFaculdade(faculdade);
+        obterEmailUtilizador();
+        setCtxLoading(true, faculdade);
+
+        await carregarDoBackend();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setCtxLoading(false);
+      }
     });
 
     document.getElementById("btnLogout")?.addEventListener("click", async () => {
@@ -242,6 +260,12 @@
         throw new Error((data && data.mensagem) || `HTTP ${res.status}`);
       }
 
+      if (data.sheet) {
+        const filtro = document.getElementById("filtroFaculdade");
+        if (filtro) filtro.value = data.sheet;
+        atualizarContextoFaculdade(data.sheet);
+      }
+
       // limpar arrays sempre que recarrega
       state.cadastradas = [];
       state.executadas = [];
@@ -249,21 +273,23 @@
 
       data.dados.forEach((item, idx) => {
         const a = normalizarDoBackend(item, idx);
+        const estadoNormalizado = String(item.estado || "").trim().toLowerCase();
 
         // Se pedimos um estado específico, encher só o array correspondente
         if (estado === "Executada") {
-          state.executadas.unshift(a);
+          if (estadoNormalizado === "executada") state.executadas.unshift(a);
           return;
         }
         if (estado === "Cancelada") {
-          state.canceladas.unshift(a);
+          if (estadoNormalizado === "cancelada") state.canceladas.unshift(a);
           return;
         }
 
         // modo geral (sem filtro)
-        if (a.estado === "Executada") state.executadas.unshift(a);
-        else if (a.estado === "Cancelada") state.canceladas.unshift(a);
-        else state.cadastradas.unshift(a); // Planificada/Adiada
+        if (estadoNormalizado === "planificada") state.cadastradas.unshift(a);
+        else if (estadoNormalizado === "executada") state.executadas.unshift(a);
+        else if (estadoNormalizado === "cancelada") state.canceladas.unshift(a);
+        else state.cadastradas.unshift(a);
       });
 
       render();
@@ -303,7 +329,12 @@
       return `<span class="chip">● ${estado}</span>`;
     }
     function render(){
+      renderEmptyRow("#tbCadastradas", state.cadastradas.length, "Sem registos planificados.");
+      renderEmptyRow("#tbExecutadas", state.executadas.length, "Sem registos executados.");
+      renderEmptyRow("#tbCanceladas", state.canceladas.length, "Sem registos cancelados.");
+
       // Cadastradas
+      if (state.cadastradas.length) {
       $("#tbCadastradas").innerHTML = state.cadastradas.map(a => `
         <tr>
           <td><strong>${a.num}</strong></td>
@@ -321,8 +352,10 @@
           </td>
         </tr>
       `).join("");
+      }
 
       // Executadas
+      if (state.executadas.length) {
       $("#tbExecutadas").innerHTML = state.executadas.map(a => `
         <tr>
           <td><strong>${a.num}</strong></td>
@@ -341,8 +374,10 @@
           <td>${chipEstado("Executada")}</td>
         </tr>
       `).join("");
+      }
 
       // Canceladas
+      if (state.canceladas.length) {
       $("#tbCanceladas").innerHTML = state.canceladas.map(a => `
         <tr>
           <td><strong>${a.num}</strong></td>
@@ -356,6 +391,7 @@
           <td>${chipEstado("Cancelada")}</td>
         </tr>
       `).join("");
+      }
 
       // Relatório (executadas)
       $("#tbRelatorio").innerHTML = state.executadas.map(a => `
@@ -384,6 +420,20 @@
       if (statCanceladas) statCanceladas.value = String(state.canceladas.length);
       if (statOrcamento) statOrcamento.value = fmtMoney(orcamentoExecutado);
 
+    }
+
+    function renderEmptyRow(selector, total, mensagem) {
+      if (total > 0) return;
+      const tbody = $(selector);
+      if (!tbody) return;
+
+      const colSpanBySelector = {
+        "#tbCadastradas": 8,
+        "#tbExecutadas": 7,
+        "#tbCanceladas": 6
+      };
+      const colSpan = colSpanBySelector[selector] || 1;
+      tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">${escapeHtml(mensagem)}</td></tr>`;
     }
 
     function escapeHtml(str){
