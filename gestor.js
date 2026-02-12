@@ -434,7 +434,7 @@
       });
     });
 
-    switchTab("cadastro");
+    switchTab("cadastradas");
 
     function aplicarMascaraNumericaInteira(selector){
       const input = $(selector);
@@ -471,17 +471,17 @@
     ["#t1", "#t2", "#t3", "#t4", "#benefH", "#benefM"].forEach(aplicarMascaraNumericaInteira);
 
     ["#t1", "#t2", "#t3", "#t4"].forEach((selector) => {
-      $(selector).addEventListener("input", updateMetaAnual);
+      $(selector)?.addEventListener("input", updateMetaAnual);
     });
 
     ["#benefH", "#benefM"].forEach((selector) => {
-      $(selector).addEventListener("input", updateBeneficiariosTotal);
+      $(selector)?.addEventListener("input", updateBeneficiariosTotal);
     });
 
     // ---------------------------
     // Cadastro
     // ---------------------------
-    $("#formCadastro").addEventListener("submit", async (e) => {
+    $("#formCadastro")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.target;
       const submitButton = form.querySelector('button[type="submit"]');
