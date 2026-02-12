@@ -16,6 +16,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     let EMAIL_ATUAL = "";
+    let relatorioGeradoUrl = "";
 
     function obterEmailUtilizador() {
       const email = normalizarEmail(auth.currentUser?.email || EMAIL_ATUAL);
@@ -506,6 +507,22 @@
       backdrop.setAttribute("aria-hidden", "true");
     }
 
+    function actualizarAccoesRelatorio({ mostrar = false, url = "" } = {}) {
+      const btnVerRelatorio = $("#btnVerRelatorioGerado");
+      const btnEnviarDc = $("#btnEnviarRelatorioDc");
+
+      relatorioGeradoUrl = mostrar ? (url || "") : "";
+
+      if (btnVerRelatorio) {
+        btnVerRelatorio.hidden = !mostrar;
+        btnVerRelatorio.disabled = !relatorioGeradoUrl;
+      }
+
+      if (btnEnviarDc) {
+        btnEnviarDc.hidden = !mostrar;
+      }
+    }
+
     function openRelatorioModal(){
       const backdrop = $("#modalRelatorioBackdrop");
       if (!backdrop) return;
@@ -514,6 +531,7 @@
         feedback.textContent = "";
         feedback.classList.remove("is-error");
       }
+      actualizarAccoesRelatorio({ mostrar: false });
       backdrop.classList.add("show");
       backdrop.setAttribute("aria-hidden", "false");
       setTimeout(() => $("#relatorioTipo")?.focus(), 50);
@@ -523,6 +541,19 @@
     $("#btnFecharRelatorio").addEventListener("click", closeRelatorioModal);
     $("#modalRelatorioBackdrop").addEventListener("click", (e) => {
       if (e.target.id === "modalRelatorioBackdrop") closeRelatorioModal();
+    });
+
+    $("#btnVerRelatorioGerado")?.addEventListener("click", () => {
+      if (!relatorioGeradoUrl) return;
+      window.open(relatorioGeradoUrl, "_blank", "noopener,noreferrer");
+    });
+
+    $("#btnEnviarRelatorioDc")?.addEventListener("click", () => {
+      const feedback = $("#relatorioFeedback");
+      if (feedback) {
+        feedback.textContent = "Envio para a DC disponível em breve.";
+        feedback.classList.remove("is-error");
+      }
     });
 
     document.addEventListener("keydown", (e) => {
@@ -689,12 +720,11 @@
       }
 
       if (feedback) {
-        feedback.textContent = "Relatório gerado com sucesso. A abrir...";
+        feedback.textContent = "Relatório gerado com sucesso.";
         feedback.classList.remove("is-error");
       }
 
-      window.open(fileUrl, "_blank", "noopener,noreferrer");
-      closeRelatorioModal();
+      actualizarAccoesRelatorio({ mostrar: true, url: fileUrl });
     }
 
     // ---------------------------
