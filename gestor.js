@@ -18,8 +18,6 @@ const dadosFaculdades = {
 const faculdadeSelect = document.getElementById("faculdadeSelect");
 const btnBuscarFaculdade = document.getElementById("btnBuscarFaculdade");
 const tabelaGestorActividades = document.getElementById("tabelaGestorActividades");
-const resumo = document.getElementById("gestorResumo");
-const totalRelatoriosEnviados = document.getElementById("totalRelatoriosEnviados");
 const botoesEstado = Array.from(document.querySelectorAll(".gestor-tab"));
 
 let faculdadeActual = "";
@@ -51,14 +49,11 @@ function actualizarTabs(estado) {
 function actualizarPainel() {
   if (!faculdadeActual || !dadosFaculdades[faculdadeActual]) {
     tabelaGestorActividades.innerHTML = '<tr><td colspan="5" class="empty-cell">Seleccione uma faculdade para iniciar a monitoria.</td></tr>';
-    resumo.textContent = "Sem faculdade seleccionada.";
     return;
   }
 
   const actividades = dadosFaculdades[faculdadeActual];
   const filtradas = actividades.filter((item) => item.estado === estadoActual);
-
-  resumo.textContent = `${faculdadeActual}: ${filtradas.length} actividade(s) ${estadoActual.toLowerCase()}(s).`;
 
   if (!filtradas.length) {
     tabelaGestorActividades.innerHTML = '<tr><td colspan="5" class="empty-cell">Sem actividades para o filtro seleccionado.</td></tr>';
@@ -83,7 +78,6 @@ function actualizarPainel() {
 btnBuscarFaculdade.addEventListener("click", () => {
   faculdadeActual = faculdadeSelect.value;
   actualizarPainel();
-  totalRelatoriosEnviados.textContent = "0";
 });
 
 botoesEstado.forEach((botao) => {
