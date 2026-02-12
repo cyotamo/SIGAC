@@ -362,6 +362,7 @@
       fb.textContent = "A carregar...";
 
       const url = `${API_URL}?op=listar_relatorios_dc&email=${encodeURIComponent(email)}`;
+      console.log("URL Relatórios DC:", url);
       const resp = await fetch(url);
       const data = await resp.json();
 
