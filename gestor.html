@@ -3,77 +3,385 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SIGAC — Monitoria da Direcção Científica</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>SIGAC — Cadastro de Actividades (Faculdade)</title>
+
+    <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="gestor-page">
-  <div class="gestor-app">
+
+<body class="faculdade-page">
+  <div class="app">
     <header class="topbar">
       <div class="brand">
         <div class="logo">SIGAC</div>
         <div style="min-width:0">
           <h1>Cadastro de Actividades — Módulo da Faculdade</h1>
-          <p id="ctxGestor">Direcção Científica: direccao.cientifica@unirovuma.ac.mz • Ano lectivo: 2026</p>
+          <p id="ctx">Faculdade: <strong>FACEE</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>facee@unirovuma.ac.mz</strong></p>
         </div>
       </div>
 
       <div class="actions">
         <span class="pill"><span class="dot"></span> Sessão: Faculdade</span>
-        <button class="btn-ghost" id="btnLogoutGestor" type="button">Terminar Sessão</button>
+        <button class="btn-ghost" id="btnDemo">Carregar demo</button>
+        <button class="btn" id="btnRelatorioTopo">Estatisticas (Executadas)</button>
+        <button class="btn-ghost" id="btnLogout" type="button">Terminar Sessão</button>
       </div>
     </header>
 
-    <main class="gestor-layout">
-      <section class="gestor-card">
-        <div class="gestor-card-head">
-          <h2>Filtro da Faculdade</h2>
-          <p>Seleccione uma faculdade e clique em buscar para monitorar actividades.</p>
+    <div class="main">
+      <section class="card content">
+        <div class="tabs" role="tablist" aria-label="Menu de gestão">
+          <button class="tab" id="tab-cadastro" role="tab" aria-selected="true" aria-controls="pane-cadastro" data-tab="cadastro">
+            Cadastro
+          </button>
+          <button class="tab" id="tab-cadastradas" role="tab" aria-selected="false" aria-controls="pane-cadastradas" data-tab="cadastradas">
+            Planificadas
+          </button>
+          <button class="tab" id="tab-executadas" role="tab" aria-selected="false" aria-controls="pane-executadas" data-tab="executadas">
+            Executadas
+          </button>
+          <button class="tab" id="tab-canceladas" role="tab" aria-selected="false" aria-controls="pane-canceladas" data-tab="canceladas">
+            Canceladas
+          </button>
+          <button class="tab" id="tab-relatorio" role="tab" aria-selected="false" aria-controls="pane-relatorio" data-tab="relatorio">
+            Estatisticas
+          </button>
         </div>
 
-        <div class="gestor-filter-inline">
-          <div class="gestor-filter-row">
-            <label for="faculdadeSelect">Faculdade</label>
-            <select id="faculdadeSelect">
-              <option value="">Escolha a faculdade...</option>
-            </select>
+
+        <div class="pane active" id="pane-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
+          <div class="card-h">
+            <h2>Cadastro (Plano)</h2>
+            <p>Registe as actividades do plano anual conforme a grelha. Após gravar, entram em <strong>Actividades Cadastradas</strong>.</p>
           </div>
-          <button id="btnBuscarFaculdade" class="btn" type="button">Buscar Faculdade</button>
+
+          <div class="card-b">
+            <form id="formCadastro">
+            <div class="grid">
+              <div class="field span2">
+                <label for="area">Área</label>
+                <select id="area" required>
+                  <option value="Pós-Graduação">A. Pós-Graduação</option>
+                  <option value="Pesquisa">B. Pesquisa</option>
+                  <option value="Extensão">C. Extensão</option>
+                  <option value="Inovação">D. Inovação</option>
+                  <option value="Publicação">E. Publicação</option>
+                </select>
+              </div>
+
+              <div class="field span2">
+                <label for="accao">Acção</label>
+                <input id="accao" placeholder="Ex.: Seminário, projecto, formação, submissão de artigo, etc." required />
+              </div>
+
+              <div class="field span2">
+                <label for="obj">Objectivos específicos</label>
+                <textarea id="obj" placeholder="Descreva os objectivos específicos..." required></textarea>
+              </div>
+
+              <div class="field span2">
+                <label for="local">Localização</label>
+                <input id="local" placeholder="Ex.: Campus, distrito, província..." />
+              </div>
+
+              <div class="field span2">
+                <label for="indicador">Indicador de produto</label>
+                <input id="indicador" placeholder="Ex.: Nº de seminários, Nº de artigos submetidos, Nº de participantes..." required />
+              </div>
+
+              <div class="grid span2 cols-5">
+                <div class="field">
+                  <label for="metaAnual">Meta anual</label>
+                  <input id="metaAnual" placeholder="Ex.: 4" inputmode="numeric" readonly />
+                </div>
+                <div class="field">
+                  <label for="t1">Meta T1</label>
+                  <input id="t1" placeholder="0" inputmode="numeric" pattern="[0-9]*" />
+                </div>
+                <div class="field">
+                  <label for="t2">Meta T2</label>
+                  <input id="t2" placeholder="0" inputmode="numeric" pattern="[0-9]*" />
+                </div>
+                <div class="field">
+                  <label for="t3">Meta T3</label>
+                  <input id="t3" placeholder="0" inputmode="numeric" pattern="[0-9]*" />
+                </div>
+                <div class="field">
+                  <label for="t4">Meta T4</label>
+                  <input id="t4" placeholder="0" inputmode="numeric" pattern="[0-9]*" />
+                </div>
+              </div>
+
+              <div class="grid span2 cols-3">
+                <div class="field">
+                  <label for="benefTotal">Beneficiários (Total)</label>
+                  <input id="benefTotal" inputmode="numeric" placeholder="0" readonly />
+                </div>
+                <div class="field">
+                  <label for="benefH">Homens</label>
+                  <input id="benefH" inputmode="numeric" placeholder="0" />
+                </div>
+                <div class="field">
+                  <label for="benefM">Mulheres</label>
+                  <input id="benefM" inputmode="numeric" placeholder="0" />
+                </div>
+              </div>
+
+              <div class="grid span2">
+                <div class="field">
+                  <label for="fonte">Fonte de financiamento</label>
+                  <select id="fonte">
+                    <option value="OE">OE</option>
+                    <option value="Externo">O. Externo</option>
+                    <option value="OE+Externo">OE + O. Externo</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="orcamento">Orçamento (MZN)</label>
+                  <input id="orcamento" inputmode="decimal" placeholder="0.00" />
+                </div>
+              </div>
+
+              <div class="field span2">
+                <label for="resp">Responsável</label>
+                <input id="resp" placeholder="Nome do responsável" />
+              </div>
+
+              <div class="field">
+                <label for="inicio">Período de execução (Início)</label>
+                <input id="inicio" type="date" />
+              </div>
+              <div class="field">
+                <label for="fim">Período de execução (Fim)</label>
+                <input id="fim" type="date" />
+              </div>
+
+              <div class="field span2">
+                <label for="nota">Observações (opcional)</label>
+                <textarea id="nota" placeholder="Notas, condições, dependências, etc."></textarea>
+              </div>
+            </div>
+
+            <div class="row">
+              <button class="btn" id="btnGuardarAtividade" type="submit">
+                <span class="btn-label">Guardar actividade</span>
+                <span class="btn-spinner" aria-hidden="true"></span>
+              </button>
+              <span id="cadastroFeedback" class="inline-feedback" role="status" aria-live="polite"></span>
+            </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Pane: Cadastradas -->
+        <div class="pane" id="pane-cadastradas" role="tabpanel" aria-labelledby="tab-cadastradas" hidden>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Área</th>
+                  <th>Acção</th>
+                  <th>Período</th>
+                  <th>Orçamento</th>
+                  <th>Fonte</th>
+                  <th>Estado</th>
+                  <th>Acções</th>
+                </tr>
+              </thead>
+              <tbody id="tbCadastradas"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pane: Executadas -->
+        <div class="pane" id="pane-executadas" role="tabpanel" aria-labelledby="tab-executadas" hidden>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Área</th>
+                  <th>Acção</th>
+                  <th>Período</th>
+                  <th>Responsável</th>
+                  <th>Evidências</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbExecutadas"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pane: Canceladas -->
+        <div class="pane" id="pane-canceladas" role="tabpanel" aria-labelledby="tab-canceladas" hidden>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Área</th>
+                  <th>Acção</th>
+                  <th>Período</th>
+                  <th>Motivo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tbCanceladas"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pane: Relatório -->
+        <div class="pane" id="pane-relatorio" role="tabpanel" aria-labelledby="tab-relatorio" hidden>
+          <div class="card-b">
+            <div class="help">
+              Aqui vais gerar o <strong>relatório das actividades executadas</strong>. Nesta versão (demo), é gerado um relatório em HTML pronto para imprimir/guardar em PDF.
+            </div>
+
+            <div class="row" style="margin-top:12px">
+              <div class="mini">Inclui: nº, área, acção, período, responsável, orçamento e evidências.</div>
+              <button class="btn" id="btnGerarRelatorio">Relatórios</button>
+            </div>
+
+            <div style="margin-top:12px" class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nº</th>
+                    <th>Área</th>
+                    <th>Acção</th>
+                    <th>Período</th>
+                    <th>Responsável</th>
+                    <th>Orçamento</th>
+                    <th>Evidências</th>
+                  </tr>
+                </thead>
+                <tbody id="tbRelatorio"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
-
-      <section class="gestor-card">
-        <div class="gestor-estado-actions" role="tablist" aria-label="Filtro de estado">
-          <button class="tab gestor-tab active" data-estado="Planificada" aria-selected="true">Planificadas</button>
-          <button class="tab gestor-tab" data-estado="Executada" aria-selected="false">Executadas</button>
-          <button class="tab gestor-tab" data-estado="Cancelada" aria-selected="false">Canceladas</button>
-          <button class="tab gestor-tab" id="btnEstatisticas" type="button">Estatisticas</button>
-        </div>
-
-        <div id="gestorStats" class="gestor-stats" hidden></div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Actividade</th>
-                <th>Estado</th>
-                <th>Período</th>
-                <th>Responsável</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaGestorActividades">
-              <tr>
-                <td colspan="5" class="empty-cell">Seleccione uma faculdade para iniciar a monitoria.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-    </main>
+    </div>
   </div>
 
-  <script src="gestor.js"></script>
+  <!-- MODAL: Relatório -->
+  <div class="modal-backdrop" id="modalRelatorioBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Relatório">
+      <div class="modal-h">
+        <h3>Relatório</h3>
+        <button class="btn-ghost" id="btnFecharRelatorio">Fechar</button>
+      </div>
+
+      <div class="modal-b">
+        <div class="grid">
+          <div class="field span2">
+            <label for="relatorioTipo">Tipo</label>
+            <select id="relatorioTipo">
+              <option value="Planificada">Planificadas</option>
+              <option value="Executada" selected>Executadas</option>
+              <option value="Cancelada">Canceladas</option>
+              <option value="Todas">Todas</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="relatorioInicio">Período (Início)</label>
+            <input id="relatorioInicio" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="relatorioFim">Período (Fim)</label>
+            <input id="relatorioFim" type="date" />
+          </div>
+
+          <div class="field span2">
+            <label for="relatorioFormato">Tipo de ficheiro</label>
+            <select id="relatorioFormato">
+              <option value="xls">Xls</option>
+              <option value="doc">.doc</option>
+              <option value="pdf" selected>PDF</option>
+            </select>
+            <div class="mini">Nesta versão demo, o relatório é gerado em HTML para impressão/guardar como PDF.</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <span id="relatorioFeedback" class="inline-feedback" role="status" aria-live="polite"></span>
+          <button class="btn" id="btnGerarRelatorioModal">Gerar relatório</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Editar/Estado/Evidências -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Editar actividade">
+      <div class="modal-h">
+        <h3>Actualizar actividade</h3>
+        <button class="btn-ghost" id="btnFechar">Fechar</button>
+      </div>
+
+      <div class="modal-b">
+        <div class="grid">
+          <div class="field span2">
+            <label>Acção</label>
+            <input id="mAccao" readonly />
+          </div>
+
+          <div class="field">
+            <label>Início</label>
+            <input id="mInicio" type="date" />
+          </div>
+          <div class="field">
+            <label>Fim</label>
+            <input id="mFim" type="date" />
+          </div>
+
+          <div class="field">
+            <label>Estado</label>
+            <select id="mEstado">
+              <option value="Planificada">Planificada</option>
+              <option value="Adiada">Adiada</option>
+              <option value="Executada">Executada</option>
+              <option value="Cancelada">Cancelada</option>
+            </select>
+          </div>
+
+          <div class="field span2">
+            <label>Motivo (se adiada/cancelada)</label>
+            <textarea id="mMotivo" placeholder="Explique o motivo..."></textarea>
+          </div>
+
+          <div class="field span2">
+            <label>Evidências (ficheiros)</label>
+            <input id="mFicheiros" type="file" multiple />
+            <div class="mini">Ao actualizar, o primeiro ficheiro seleccionado é convertido para base64 e enviado para o backend.</div>
+          </div>
+
+          <div class="field span2">
+            <label for="mEvidenciaUrl">Link da evidência (opcional)</label>
+            <input id="mEvidenciaUrl" type="url" placeholder="https://..." />
+          </div>
+
+          <div class="field span2">
+            <div class="help">
+              <strong>Regras:</strong> Se marcar <strong>Executada</strong>, a actividade passa para “Executadas”.
+              Se marcar <strong>Cancelada</strong>, passa para “Canceladas”. Se marcar <strong>Adiada</strong>, mantém-se nas cadastradas com motivo.
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="mini" id="mInfo"></span>
+          <span id="modalFeedback" class="inline-feedback" role="status" aria-live="polite"></span>
+          <button class="btn" id="btnGuardarModal">Guardar alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script type="module" src="faculdade.js"></script>
 </body>
 </html>
