@@ -566,14 +566,15 @@
           feedback.classList.remove("is-error");
         }
 
+        const params = new URLSearchParams();
+        params.set("operacao", "enviar_relatorio_dc");
+        params.set("email", email);
+        params.set("relatorioUrl", relatorioUrl);
+
         const resp = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            operacao: "enviar_relatorio_dc",
-            email,
-            relatorioUrl
-          })
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: params.toString()
         });
 
         const data = await resp.json().catch(() => ({}));
