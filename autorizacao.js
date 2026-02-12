@@ -2,7 +2,8 @@ export const EMAILS_POR_FACULDADE = {
   "facee@unirovuma.ac.mz": "FACEE",
   "fcsf@unirovuma.ac.mz": "FCSF",
   "fct@unirovuma.ac.mz": "FCT",
-  "fd@unirovuma.ac.mz": "FD"
+  "fd@unirovuma.ac.mz": "FD",
+  "dc@unirovuma.ac.mz": "DC"
 };
 
 export const EMAILS_PERMITIDOS = Object.keys(EMAILS_POR_FACULDADE);
