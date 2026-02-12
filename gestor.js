@@ -22,6 +22,38 @@
     const auth = getAuth(app);
     let EMAIL_ATUAL = "";
 
+    function obterEmailSessao_() {
+      // 1) tenta o helper existente
+      try {
+        const ctx = (typeof obterContextoLogin === "function") ? obterContextoLogin() : null;
+        const e1 = String(ctx?.email || "").trim().toLowerCase();
+        if (e1) return e1;
+      } catch (_) {}
+
+      // 2) tenta localStorage (ajusta as chaves se no teu projecto forem diferentes)
+      const chaves = ["contextoLogin", "ctxLogin", "loginContext", "auth", "session"];
+      for (const k of chaves) {
+        try {
+          const raw = localStorage.getItem(k);
+          if (!raw) continue;
+          const obj = JSON.parse(raw);
+          const e2 = String(obj?.email || obj?.user?.email || "").trim().toLowerCase();
+          if (e2) return e2;
+        } catch (_) {}
+      }
+
+      // 3) fallback para o fluxo actual deste projecto
+      const e3 = normalizarEmail(localStorage.getItem("utilizador") || EMAIL_ATUAL || auth.currentUser?.email || "");
+      if (e3) return e3;
+
+      // 4) nada encontrado
+      return "";
+    }
+
+    function isDC_(email) {
+      return String(email || "").trim().toLowerCase() === "dc@unirovuma.ac.mz";
+    }
+
     function obterEmailUtilizador() {
       const email = normalizarEmail(auth.currentUser?.email || EMAIL_ATUAL);
       if (!email) {
@@ -109,6 +141,12 @@
       if (EMAIL_ATUAL) {
         atualizarContextoUtilizador(EMAIL_ATUAL);
         preencherFiltroFaculdades();
+
+        const email = obterEmailSessao_();
+        if (isDC_(email)) {
+          return;
+        }
+
         carregarDoBackend().catch(console.error);
       }
     });
@@ -313,8 +351,7 @@
     }
 
     async function carregarRelatoriosEnviadosDC_() {
-      const ctx = obterContextoLogin();
-      const email = (ctx?.email || "").trim().toLowerCase();
+      const email = obterEmailSessao_();
       if (!email) throw new Error("Email não encontrado na sessão.");
 
       const tbody = document.getElementById("tbRelatoriosEnviados");
@@ -515,16 +552,26 @@
         switchTab(tab);
 
         try {
+          const email = obterEmailSessao_();
+
           if (tab === "canceladas") {
+            if (isDC_(email)) return;
             await carregarDoBackend("Cancelada");
           } else if (tab === "executadas") {
+            if (isDC_(email)) return;
             await carregarDoBackend("Executada");
           } else if (tab === "cadastradas") {
+            if (isDC_(email)) return;
             await carregarDoBackend();
           } else if (tab === "estatisticas") {
+            if (isDC_(email)) return;
             await carregarDoBackend();
           } else if (tab === "relatorios-enviados") {
-            await carregarRelatoriosEnviadosDC_();
+            if (isDC_(email)) {
+              await carregarRelatoriosEnviadosDC_();
+            } else {
+              await carregarDoBackend();
+            }
           }
         } catch (err) {
           console.error(err);
