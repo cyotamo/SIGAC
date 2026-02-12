@@ -1,6 +1,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
+    import { EMAILS_POR_FACULDADE, emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
 
     const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
 
@@ -32,6 +32,27 @@
       el.innerHTML = `Faculdade: <strong>${faculdade}</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(email)}</strong>`;
     }
 
+    function atualizarContextoFaculdade(nomeFaculdade) {
+      const el = document.getElementById("ctx");
+      if (!el) return;
+      el.innerHTML = `Faculdade: <strong>${escapeHtml(nomeFaculdade || "N/D")}</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(obterEmailUtilizador())}</strong>`;
+    }
+
+    function preencherFiltroFaculdades() {
+      const filtro = document.getElementById("filtroFaculdade");
+      if (!filtro) return;
+
+      const faculdades = [...new Set(Object.values(EMAILS_POR_FACULDADE))].sort();
+      filtro.innerHTML = faculdades
+        .map((faculdade) => `<option value="${escapeHtml(faculdade)}">${escapeHtml(faculdade)}</option>`)
+        .join("");
+
+      const faculdadeAtual = faculdadePorEmail(EMAIL_ATUAL);
+      if (faculdadeAtual) {
+        filtro.value = faculdadeAtual;
+      }
+    }
+
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "index.html";
@@ -48,8 +69,14 @@
 
       if (EMAIL_ATUAL) {
         atualizarContextoUtilizador(EMAIL_ATUAL);
+        preencherFiltroFaculdades();
         carregarDoBackend().catch(console.error);
       }
+    });
+
+    document.getElementById("btnAplicarFiltroFaculdade")?.addEventListener("click", () => {
+      const faculdade = document.getElementById("filtroFaculdade")?.value || "";
+      atualizarContextoFaculdade(faculdade);
     });
 
     document.getElementById("btnLogout")?.addEventListener("click", async () => {
@@ -315,6 +342,20 @@
         </tr>
       `).join("");
 
+      const orcamentoExecutado = state.executadas.reduce((total, atividade) => {
+        return total + parsePositiveNumber(atividade.orcamento);
+      }, 0);
+
+      const statPlanificadas = document.getElementById("statPlanificadas");
+      const statExecutadas = document.getElementById("statExecutadas");
+      const statCanceladas = document.getElementById("statCanceladas");
+      const statOrcamento = document.getElementById("statOrcamento");
+
+      if (statPlanificadas) statPlanificadas.value = String(state.cadastradas.length);
+      if (statExecutadas) statExecutadas.value = String(state.executadas.length);
+      if (statCanceladas) statCanceladas.value = String(state.canceladas.length);
+      if (statOrcamento) statOrcamento.value = fmtMoney(orcamentoExecutado);
+
     }
 
     function escapeHtml(str){
@@ -354,7 +395,9 @@
             await carregarDoBackend("Executada");
           } else if (tab === "cadastradas") {
             await carregarDoBackend();
-          } else if (tab === "relatorio") {
+          } else if (tab === "estatisticas") {
+            await carregarDoBackend();
+          } else if (tab === "relatorios-enviados") {
             await carregarDoBackend();
           }
         } catch (err) {
@@ -362,8 +405,6 @@
         }
       });
     });
-
-    $("#btnRelatorioTopo").addEventListener("click", () => switchTab("relatorio"));
 
     switchTab("cadastro");
 
@@ -740,8 +781,6 @@
 
       await gerarRelatorioViaAPI({ tipo, inicio, fim, formato });
     });
-    $("#btnRelatorioTopo").addEventListener("dblclick", () => gerarRelatorioImprimivel());
-
     function filtrarActividadesRelatorio(tipo){
       if (tipo === "Planificada") return state.cadastradas.filter(a => a.estado === "Planificada");
       if (tipo === "Cancelada") return state.canceladas;
@@ -826,71 +865,6 @@
       `);
       w.document.close();
     }
-
-    // ---------------------------
-    // Demo
-    // ---------------------------
-    $("#btnDemo").addEventListener("click", () => {
-      state.cadastradas = [];
-      state.executadas = [];
-      state.canceladas = [];
-
-      state.cadastradas.push({
-        id: crypto.randomUUID(),
-        num:"1",
-        area:"Pesquisa",
-        accao:"Seminário sobre Governação Electrónica",
-        obj:"Divulgar resultados de pesquisa e promover debate académico.",
-        indicador:"1 seminário realizado",
-        orcamento:"15000",
-        fonte:"OE",
-        resp:"Coord. de Pesquisa",
-        inicio:"2026-03-12",
-        fim:"2026-03-12",
-        estado:"Planificada",
-        motivo:"",
-        evidenciasText:"",
-        evidenciasCount:0
-      });
-
-      state.executadas.push({
-        id: crypto.randomUUID(),
-        num:"2",
-        area:"Extensão",
-        accao:"Campanha de literacia financeira comunitária",
-        obj:"Capacitar jovens e microempreendedores em finanças básicas.",
-        indicador:"200 beneficiários",
-        orcamento:"30000",
-        fonte:"Externo",
-        resp:"Coord. de Extensão",
-        inicio:"2026-05-01",
-        fim:"2026-05-30",
-        estado:"Executada",
-        motivo:"",
-        evidenciasText:"https://drive.google.com/..., https://photos.google.com/...",
-        evidenciasCount:2
-      });
-
-      state.canceladas.push({
-        id: crypto.randomUUID(),
-        num:"3",
-        area:"Publicação",
-        accao:"Submissão de artigo a revista indexada",
-        obj:"Publicar resultados de investigação.",
-        indicador:"1 artigo submetido",
-        orcamento:"0",
-        fonte:"OE",
-        resp:"Equipa de Investigação",
-        inicio:"2026-07-01",
-        fim:"2026-09-30",
-        estado:"Cancelada",
-        motivo:"Falta de dados completos para submissão.",
-        evidenciasText:"",
-        evidenciasCount:0
-      });
-
-      render();
-    });
 
     // Start
     render();
