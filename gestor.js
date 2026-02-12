@@ -312,6 +312,48 @@
       render();
     }
 
+    async function carregarRelatoriosEnviadosDC_() {
+      const ctx = obterContextoLogin(obterEmailUtilizador());
+      const email = (ctx?.email || ctx?.utilizador || "").trim().toLowerCase();
+
+      const tbody = document.getElementById("tbRelatoriosEnviados");
+      const fb = document.getElementById("relatoriosEnviadosFeedback");
+      if (!tbody || !fb) return;
+
+      tbody.innerHTML = "";
+      fb.textContent = "A carregar...";
+
+      const url = `${API_URL}?op=listar_relatorios_dc&email=${encodeURIComponent(email)}`;
+      const resp = await fetch(url, { method: "GET" });
+      const data = await resp.json();
+
+      if (!resp.ok || !data?.sucesso || !Array.isArray(data.dados)) {
+        throw new Error(data?.mensagem || `HTTP ${resp.status}`);
+      }
+
+      tbody.innerHTML = data.dados.map((item) => {
+        const tem = !!item.relatorioUrl;
+        const rel = tem
+          ? `<a href="${escapeHtml(item.relatorioUrl)}" target="_blank" rel="noopener">📄 PDF</a>`
+          : `<span class="muted">Não enviado</span>`;
+
+        const dt = item.enviadoEm
+          ? new Date(item.enviadoEm).toLocaleString("pt-PT")
+          : `<span class="muted">—</span>`;
+
+        return `
+          <tr>
+            <td>${escapeHtml(item.ord ?? "")}</td>
+            <td>${escapeHtml(item.faculdade ?? "")}</td>
+            <td>${rel}</td>
+            <td>${dt}</td>
+          </tr>
+        `;
+      }).join("");
+
+      fb.textContent = "";
+    }
+
     // ---------------------------
     const state = {
       cadastradas: [],
@@ -411,19 +453,6 @@
       `).join("");
       }
 
-      // Relatório (executadas)
-      $("#tbRelatorio").innerHTML = state.executadas.map(a => `
-        <tr>
-          <td><strong>${a.num}</strong></td>
-          <td>${a.area}</td>
-          <td>${escapeHtml(a.accao)}</td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
-          <td>${escapeHtml(a.resp || "—")}</td>
-          <td>${fmtMoney(a.orcamento)}</td>
-          <td>${(a.evidenciasText || "").trim() ? escapeHtml(a.evidenciasText) : ((a.evidenciasCount||0) ? `${a.evidenciasCount} ficheiro(s)` : "—")}</td>
-        </tr>
-      `).join("");
-
       const orcamentoExecutado = state.executadas.reduce((total, atividade) => {
         return total + parsePositiveNumber(atividade.orcamento);
       }, 0);
@@ -494,10 +523,14 @@
           } else if (tab === "estatisticas") {
             await carregarDoBackend();
           } else if (tab === "relatorios-enviados") {
-            await carregarDoBackend();
+            await carregarRelatoriosEnviadosDC_();
           }
         } catch (err) {
           console.error(err);
+          if (tab === "relatorios-enviados") {
+            document.getElementById("relatoriosEnviadosFeedback").textContent =
+              (err && err.message) ? err.message : "Erro ao carregar relatórios.";
+          }
         }
       });
     });
@@ -673,9 +706,9 @@
       setTimeout(() => $("#relatorioTipo")?.focus(), 50);
     }
 
-    $("#btnGerarRelatorio").addEventListener("click", openRelatorioModal);
-    $("#btnFecharRelatorio").addEventListener("click", closeRelatorioModal);
-    $("#modalRelatorioBackdrop").addEventListener("click", (e) => {
+    $("#btnGerarRelatorio")?.addEventListener("click", openRelatorioModal);
+    $("#btnFecharRelatorio")?.addEventListener("click", closeRelatorioModal);
+    $("#modalRelatorioBackdrop")?.addEventListener("click", (e) => {
       if (e.target.id === "modalRelatorioBackdrop") closeRelatorioModal();
     });
 

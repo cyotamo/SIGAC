@@ -144,33 +144,20 @@
 
         <!-- Pane: Relatórios enviados -->
         <div class="pane" id="pane-relatorios-enviados" role="tabpanel" aria-labelledby="tab-relatorios-enviados" hidden>
-          <div class="card-b">
-            <div class="help">
-              Aqui vais gerar o <strong>relatório das actividades executadas</strong>. Nesta versão (demo), é gerado um relatório em HTML pronto para imprimir/guardar em PDF.
-            </div>
-
-            <div class="row" style="margin-top:12px">
-              <div class="mini">Inclui: nº, área, acção, período, responsável, orçamento e evidências.</div>
-              <button class="btn" id="btnGerarRelatorio">Relatórios</button>
-            </div>
-
-            <div style="margin-top:12px" class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nº</th>
-                    <th>Área</th>
-                    <th>Acção</th>
-                    <th>Período</th>
-                    <th>Responsável</th>
-                    <th>Orçamento</th>
-                    <th>Evidências</th>
-                  </tr>
-                </thead>
-                <tbody id="tbRelatorio"></tbody>
-              </table>
-            </div>
+          <div class="table-wrap">
+            <table class="tabela-gestao">
+              <thead>
+                <tr>
+                  <th>Ord</th>
+                  <th>Faculdade</th>
+                  <th>Relatório</th>
+                  <th>Data e hora de envio</th>
+                </tr>
+              </thead>
+              <tbody id="tbRelatoriosEnviados"></tbody>
+            </table>
           </div>
+          <div id="relatoriosEnviadosFeedback" class="muted"></div>
         </div>
       </section>
     </div>
