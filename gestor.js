@@ -313,8 +313,9 @@
     }
 
     async function carregarRelatoriosEnviadosDC_() {
-      const ctx = obterContextoLogin(obterEmailUtilizador());
-      const email = (ctx?.email || ctx?.utilizador || "").trim().toLowerCase();
+      const ctx = obterContextoLogin();
+      const email = (ctx?.email || "").trim().toLowerCase();
+      if (!email) throw new Error("Email não encontrado na sessão.");
 
       const tbody = document.getElementById("tbRelatoriosEnviados");
       const fb = document.getElementById("relatoriosEnviadosFeedback");
@@ -324,7 +325,7 @@
       fb.textContent = "A carregar...";
 
       const url = `${API_URL}?op=listar_relatorios_dc&email=${encodeURIComponent(email)}`;
-      const resp = await fetch(url, { method: "GET" });
+      const resp = await fetch(url);
       const data = await resp.json();
 
       if (!resp.ok || !data?.sucesso || !Array.isArray(data.dados)) {
