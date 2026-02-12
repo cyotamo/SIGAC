@@ -302,19 +302,6 @@
         </tr>
       `).join("");
 
-      // Relatório (executadas)
-      $("#tbRelatorio").innerHTML = state.executadas.map(a => `
-        <tr>
-          <td><strong>${a.num}</strong></td>
-          <td>${a.area}</td>
-          <td>${escapeHtml(a.accao)}</td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
-          <td>${escapeHtml(a.resp || "—")}</td>
-          <td>${fmtMoney(a.orcamento)}</td>
-          <td>${(a.evidenciasText || "").trim() ? escapeHtml(a.evidenciasText) : ((a.evidenciasCount||0) ? `${a.evidenciasCount} ficheiro(s)` : "—")}</td>
-        </tr>
-      `).join("");
-
     }
 
     function escapeHtml(str){
@@ -354,16 +341,12 @@
             await carregarDoBackend("Executada");
           } else if (tab === "cadastradas") {
             await carregarDoBackend();
-          } else if (tab === "relatorio") {
-            await carregarDoBackend();
           }
         } catch (err) {
           console.error(err);
         }
       });
     });
-
-    $("#btnRelatorioTopo").addEventListener("click", () => switchTab("relatorio"));
 
     switchTab("cadastro");
 
@@ -536,7 +519,7 @@
       setTimeout(() => $("#relatorioTipo")?.focus(), 50);
     }
 
-    $("#btnGerarRelatorio").addEventListener("click", openRelatorioModal);
+    $("#btnGerarRelatorio")?.addEventListener("click", openRelatorioModal);
     $("#btnFecharRelatorio").addEventListener("click", closeRelatorioModal);
     $("#modalRelatorioBackdrop").addEventListener("click", (e) => {
       if (e.target.id === "modalRelatorioBackdrop") closeRelatorioModal();
@@ -740,7 +723,6 @@
 
       await gerarRelatorioViaAPI({ tipo, inicio, fim, formato });
     });
-    $("#btnRelatorioTopo").addEventListener("dblclick", () => gerarRelatorioImprimivel());
 
     function filtrarActividadesRelatorio(tipo){
       if (tipo === "Planificada") return state.cadastradas.filter(a => a.estado === "Planificada");
@@ -826,71 +808,6 @@
       `);
       w.document.close();
     }
-
-    // ---------------------------
-    // Demo
-    // ---------------------------
-    $("#btnDemo").addEventListener("click", () => {
-      state.cadastradas = [];
-      state.executadas = [];
-      state.canceladas = [];
-
-      state.cadastradas.push({
-        id: crypto.randomUUID(),
-        num:"1",
-        area:"Pesquisa",
-        accao:"Seminário sobre Governação Electrónica",
-        obj:"Divulgar resultados de pesquisa e promover debate académico.",
-        indicador:"1 seminário realizado",
-        orcamento:"15000",
-        fonte:"OE",
-        resp:"Coord. de Pesquisa",
-        inicio:"2026-03-12",
-        fim:"2026-03-12",
-        estado:"Planificada",
-        motivo:"",
-        evidenciasText:"",
-        evidenciasCount:0
-      });
-
-      state.executadas.push({
-        id: crypto.randomUUID(),
-        num:"2",
-        area:"Extensão",
-        accao:"Campanha de literacia financeira comunitária",
-        obj:"Capacitar jovens e microempreendedores em finanças básicas.",
-        indicador:"200 beneficiários",
-        orcamento:"30000",
-        fonte:"Externo",
-        resp:"Coord. de Extensão",
-        inicio:"2026-05-01",
-        fim:"2026-05-30",
-        estado:"Executada",
-        motivo:"",
-        evidenciasText:"https://drive.google.com/..., https://photos.google.com/...",
-        evidenciasCount:2
-      });
-
-      state.canceladas.push({
-        id: crypto.randomUUID(),
-        num:"3",
-        area:"Publicação",
-        accao:"Submissão de artigo a revista indexada",
-        obj:"Publicar resultados de investigação.",
-        indicador:"1 artigo submetido",
-        orcamento:"0",
-        fonte:"OE",
-        resp:"Equipa de Investigação",
-        inicio:"2026-07-01",
-        fim:"2026-09-30",
-        estado:"Cancelada",
-        motivo:"Falta de dados completos para submissão.",
-        evidenciasText:"",
-        evidenciasCount:0
-      });
-
-      render();
-    });
 
     // Start
     render();
