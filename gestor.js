@@ -17,7 +17,9 @@ const dadosFaculdades = {
 
 const faculdadeSelect = document.getElementById("faculdadeSelect");
 const btnBuscarFaculdade = document.getElementById("btnBuscarFaculdade");
+const btnEstatisticas = document.getElementById("btnEstatisticas");
 const tabelaGestorActividades = document.getElementById("tabelaGestorActividades");
+const gestorStats = document.getElementById("gestorStats");
 const botoesEstado = Array.from(document.querySelectorAll(".gestor-tab"));
 
 let faculdadeActual = "";
@@ -47,6 +49,8 @@ function actualizarTabs(estado) {
 }
 
 function actualizarPainel() {
+  gestorStats.hidden = true;
+
   if (!faculdadeActual || !dadosFaculdades[faculdadeActual]) {
     tabelaGestorActividades.innerHTML = '<tr><td colspan="5" class="empty-cell">Seleccione uma faculdade para iniciar a monitoria.</td></tr>';
     return;
@@ -75,6 +79,38 @@ function actualizarPainel() {
     .join("");
 }
 
+function mostrarEstatisticas() {
+  if (!faculdadeActual || !dadosFaculdades[faculdadeActual]) {
+    tabelaGestorActividades.innerHTML = '<tr><td colspan="5" class="empty-cell">Seleccione uma faculdade para visualizar as estatísticas.</td></tr>';
+    gestorStats.hidden = true;
+    return;
+  }
+
+  const actividades = dadosFaculdades[faculdadeActual];
+  const totais = {
+    planificadas: actividades.filter((item) => item.estado === "Planificada").length,
+    executadas: actividades.filter((item) => item.estado === "Executada").length,
+    canceladas: actividades.filter((item) => item.estado === "Cancelada").length
+  };
+
+  gestorStats.innerHTML = `
+    <article class="stat-card">
+      <h3>Planificadas</h3>
+      <strong>${totais.planificadas}</strong>
+    </article>
+    <article class="stat-card ok">
+      <h3>Executadas</h3>
+      <strong>${totais.executadas}</strong>
+    </article>
+    <article class="stat-card bad">
+      <h3>Canceladas</h3>
+      <strong>${totais.canceladas}</strong>
+    </article>
+  `;
+
+  gestorStats.hidden = false;
+}
+
 btnBuscarFaculdade.addEventListener("click", () => {
   faculdadeActual = faculdadeSelect.value;
   actualizarPainel();
@@ -82,10 +118,17 @@ btnBuscarFaculdade.addEventListener("click", () => {
 
 botoesEstado.forEach((botao) => {
   botao.addEventListener("click", () => {
+    if (!botao.dataset.estado) return;
+
     estadoActual = botao.dataset.estado;
     actualizarTabs(estadoActual);
     actualizarPainel();
   });
+});
+
+btnEstatisticas.addEventListener("click", () => {
+  actualizarTabs("");
+  mostrarEstatisticas();
 });
 
 carregarFaculdades();
