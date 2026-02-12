@@ -4,6 +4,11 @@
 
     const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
 
+    // Mapa de faculdade -> email esperado pelo backend
+    const EMAIL_POR_FACULDADE = Object.fromEntries(
+      Object.entries(EMAILS_POR_FACULDADE).map(([email, faculdade]) => [faculdade, email])
+    );
+
     const firebaseConfig = {
       apiKey: "AIzaSyC-z5eNHi-rosi0Ak64bPeQZU-6oJA9DDk",
       authDomain: "sigacur00.firebaseapp.com",
@@ -111,15 +116,26 @@
     document.getElementById("btnAplicarFiltroFaculdade")?.addEventListener("click", async () => {
       try {
         const faculdade = document.getElementById("filtroFaculdade")?.value || "";
-        if (!faculdade) return;
+        if (!faculdade) {
+          alert("Seleccione uma faculdade.");
+          return;
+        }
 
         atualizarContextoFaculdade(faculdade);
-        obterEmailUtilizador();
+
+        const emailFaculdade = EMAIL_POR_FACULDADE[faculdade];
+        if (!emailFaculdade) {
+          alert("Email da faculdade não configurado no front.");
+          return;
+        }
+
+        state.emailParaBackend = emailFaculdade;
         setCtxLoading(true, faculdade);
 
         await carregarDoBackend();
       } catch (err) {
         console.error(err);
+        alert("Erro ao carregar dados.");
       } finally {
         setCtxLoading(false);
       }
@@ -244,7 +260,8 @@
     }
 
     async function carregarDoBackend(estado) {
-      const email = obterEmailUtilizador();
+      const emailAtual = obterEmailUtilizador();
+      const email = state.emailParaBackend || emailAtual;
       const params = new URLSearchParams({ email });
       if (estado) params.set("estado", estado);
 
@@ -300,6 +317,7 @@
       cadastradas: [],
       executadas: [],
       canceladas: [],
+      emailParaBackend: null,
       currentEdit: null
     };
 
