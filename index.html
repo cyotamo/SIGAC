@@ -6,14 +6,37 @@
   <title>Universidade Rovuma | SIGAC</title>
   <link rel="icon" type="image/svg+xml" href="logo.svg" />
   <meta name="description" content="SIGAC - Sistema Integrado de Gestão de Actividades Científicas da Universidade Rovuma." />
+  <link rel="canonical" href="https://cyotamo.github.io/SIGAC/index.html" />
   <meta property="og:title" content="Universidade Rovuma | SIGAC" />
   <meta property="og:description" content="Aceda ao SIGAC para gerir actividades científicas." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="logo.svg" />
+  <meta property="og:url" content="https://cyotamo.github.io/SIGAC/index.html" />
+  <meta property="og:image" content="https://cyotamo.github.io/SIGAC/logo.svg" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Universidade Rovuma | SIGAC" />
   <meta name="twitter:description" content="Aceda ao SIGAC para gerir actividades científicas." />
-  <meta name="twitter:image" content="logo.svg" />
+  <meta name="twitter:image" content="https://cyotamo.github.io/SIGAC/logo.svg" />
+  <script>
+    (() => {
+      const isFirebase = window.location.origin === 'https://sigacur00.web.app';
+      const canonicalUrl = isFirebase
+        ? 'https://sigacur00.web.app/'
+        : 'https://cyotamo.github.io/SIGAC/index.html';
+      const imageUrl = isFirebase
+        ? 'https://sigacur00.web.app/logo.svg'
+        : 'https://cyotamo.github.io/SIGAC/logo.svg';
+
+      const canonical = document.querySelector('link[rel="canonical"]');
+      const ogUrl = document.querySelector('meta[property="og:url"]');
+      const ogImage = document.querySelector('meta[property="og:image"]');
+      const twitterImage = document.querySelector('meta[name="twitter:image"]');
+
+      if (canonical) canonical.setAttribute('href', canonicalUrl);
+      if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+      if (ogImage) ogImage.setAttribute('content', imageUrl);
+      if (twitterImage) twitterImage.setAttribute('content', imageUrl);
+    })();
+  </script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 
