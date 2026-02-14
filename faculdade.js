@@ -219,7 +219,9 @@
       cadastradas: [],
       executadas: [],
       canceladas: [],
+      docentes: [],
       currentEdit: null,
+      currentDocenteId: "",
       page: {
         cadastradas: 1,
         executadas: 1,
@@ -431,6 +433,92 @@
       }
       renderPagination("canceladas", state.canceladas.length);
 
+      // Docentes
+      if (!state.docentes.length) {
+        renderEmpty("#tbDocentes", 4);
+      } else {
+        $("#tbDocentes").innerHTML = state.docentes.map((d, idx) => `
+          <tr>
+            <td><strong>${idx + 1}</strong></td>
+            <td>${escapeHtml(d.nome || "—")}</td>
+            <td>${escapeHtml(d.nivel || "—")}</td>
+            <td>${escapeHtml(d.area || "—")}</td>
+          </tr>
+        `).join("");
+      }
+
+    }
+
+    function carregarDocentesLocal() {
+      try {
+        const bruto = localStorage.getItem("sigac_docentes");
+        if (!bruto) {
+          state.docentes = [];
+          return;
+        }
+        const dados = JSON.parse(bruto);
+        if (!Array.isArray(dados)) {
+          state.docentes = [];
+          return;
+        }
+        state.docentes = dados.map((d) => ({
+          id: d.id || crypto.randomUUID(),
+          nome: d.nome || "",
+          nivel: d.nivel || "",
+          area: d.area || "",
+          formacao: d.formacao || "",
+          instituicao: d.instituicao || "",
+          pais: d.pais || ""
+        }));
+      } catch (err) {
+        console.error("Falha ao carregar docentes locais:", err);
+        state.docentes = [];
+      }
+    }
+
+    function guardarDocentesLocal() {
+      localStorage.setItem("sigac_docentes", JSON.stringify(state.docentes));
+    }
+
+    function renderSelectDocentes(filtro = "") {
+      const select = $("#docenteSelecionado");
+      if (!select) return;
+      const filtroNormalizado = String(filtro || "").trim().toLowerCase();
+      const docentesFiltrados = state.docentes.filter((d) =>
+        (d.nome || "").toLowerCase().includes(filtroNormalizado)
+      );
+
+      select.innerHTML = `<option value="">Novo docente</option>${docentesFiltrados
+        .map((d) => `<option value="${escapeHtml(d.id)}">${escapeHtml(d.nome || "Sem nome")}</option>`)
+        .join("")}`;
+      select.value = state.currentDocenteId || "";
+    }
+
+    function limparFormularioDocente() {
+      state.currentDocenteId = "";
+      $("#docenteNome").value = "";
+      $("#docenteNivel").value = "";
+      $("#docenteArea").value = "";
+      $("#docenteFormacao").value = "";
+      $("#docenteInstituicao").value = "";
+      $("#docentePais").value = "";
+      $("#docenteSelecionado").value = "";
+    }
+
+    function preencherFormularioDocente(id) {
+      const docente = state.docentes.find((d) => d.id === id);
+      if (!docente) {
+        limparFormularioDocente();
+        return;
+      }
+      state.currentDocenteId = docente.id;
+      $("#docenteNome").value = docente.nome || "";
+      $("#docenteNivel").value = docente.nivel || "";
+      $("#docenteArea").value = docente.area || "";
+      $("#docenteFormacao").value = docente.formacao || "";
+      $("#docenteInstituicao").value = docente.instituicao || "";
+      $("#docentePais").value = docente.pais || "";
+      $("#docenteSelecionado").value = docente.id;
     }
 
     function escapeHtml(str){
@@ -461,6 +549,7 @@
     document.querySelectorAll(".tab").forEach(btn => {
       btn.addEventListener("click", async () => {
         const tab = btn.dataset.tab;
+        if (!tab) return;
         switchTab(tab);
 
         try {
@@ -808,6 +897,83 @@
       if (e.key !== "Escape") return;
       closeModal();
       closeRelatorioModal();
+      closeDocenteModal();
+    });
+
+    function openDocenteModal() {
+      const backdrop = $("#modalDocenteBackdrop");
+      if (!backdrop) return;
+      const feedback = $("#docenteFeedback");
+      if (feedback) {
+        feedback.textContent = "";
+        feedback.classList.remove("is-error");
+      }
+      $("#buscaDocente").value = "";
+      renderSelectDocentes("");
+      limparFormularioDocente();
+      backdrop.classList.add("show");
+      backdrop.setAttribute("aria-hidden", "false");
+      setTimeout(() => $("#buscaDocente")?.focus(), 50);
+    }
+
+    function closeDocenteModal() {
+      const backdrop = $("#modalDocenteBackdrop");
+      if (!backdrop) return;
+      backdrop.classList.remove("show");
+      backdrop.setAttribute("aria-hidden", "true");
+    }
+
+    $("#btnCadastrarEditarDocente")?.addEventListener("click", openDocenteModal);
+    $("#btnFecharDocente")?.addEventListener("click", closeDocenteModal);
+    $("#modalDocenteBackdrop")?.addEventListener("click", (e) => {
+      if (e.target.id === "modalDocenteBackdrop") closeDocenteModal();
+    });
+
+    $("#buscaDocente")?.addEventListener("input", (e) => {
+      renderSelectDocentes(e.target.value);
+    });
+
+    $("#docenteSelecionado")?.addEventListener("change", (e) => {
+      const id = e.target.value;
+      if (!id) {
+        limparFormularioDocente();
+        return;
+      }
+      preencherFormularioDocente(id);
+    });
+
+    $("#btnGuardarDocente")?.addEventListener("click", () => {
+      const feedback = $("#docenteFeedback");
+      const nome = $("#docenteNome").value.trim();
+      if (!nome) {
+        feedback.textContent = "Informe o nome do docente.";
+        feedback.classList.add("is-error");
+        return;
+      }
+
+      const payload = {
+        id: state.currentDocenteId || crypto.randomUUID(),
+        nome,
+        nivel: $("#docenteNivel").value.trim(),
+        area: $("#docenteArea").value.trim(),
+        formacao: $("#docenteFormacao").value.trim(),
+        instituicao: $("#docenteInstituicao").value.trim(),
+        pais: $("#docentePais").value.trim()
+      };
+
+      const idx = state.docentes.findIndex((d) => d.id === payload.id);
+      if (idx >= 0) {
+        state.docentes[idx] = payload;
+      } else {
+        state.docentes.unshift(payload);
+      }
+
+      guardarDocentesLocal();
+      render();
+      renderSelectDocentes($("#buscaDocente").value);
+      preencherFormularioDocente(payload.id);
+      feedback.textContent = idx >= 0 ? "Docente actualizado com sucesso." : "Docente cadastrado com sucesso.";
+      feedback.classList.remove("is-error");
     });
 
     // ---------------------------
@@ -1088,5 +1254,6 @@
     }
 
     // Start
+    carregarDocentesLocal();
     render();
   
