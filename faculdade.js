@@ -2,8 +2,9 @@
     import { emailAutorizado, normalizarEmail } from "./autorizacao.js";
     import { auth } from "./firebase-init.js";
     import { carregarJSONP } from "./authFetch.js";
+import { WEB_URL } from "./faculdades.js";
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbz2uYJ7708eNcCnHonI6i0a0YQA2GiyrVId6hOO4lwuQiFyg9nlLH4FSUF7uqQNErnt_Q/exec";
+const API_URL = WEB_URL;
 
     let EMAIL_ATUAL = "";
     let relatorioGeradoUrl = "";
