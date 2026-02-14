@@ -3,7 +3,7 @@
     import { auth } from "./firebase-init.js";
     import { fetchComToken } from "./authFetch.js";
 
-    const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbz2uYJ7708eNcCnHonI6i0a0YQA2GiyrVId6hOO4lwuQiFyg9nlLH4FSUF7uqQNErnt_Q/exec";
 
     // Mapa de faculdade -> email esperado pelo backend
     const EMAIL_POR_FACULDADE = Object.fromEntries(
