@@ -1,22 +1,16 @@
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { emailAutorizado, normalizarEmail } from "./autorizacao.js";
+    import { auth } from "./firebase-init.js";
+    import { fetchComToken } from "./authFetch.js";
 
     const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC-z5eNHi-rosi0Ak64bPeQZU-6oJA9DDk",
-      authDomain: "sigacur00.firebaseapp.com",
-      projectId: "sigacur00",
-      storageBucket: "sigacur00.firebasestorage.app",
-      messagingSenderId: "224944945440",
-      appId: "1:224944945440:web:743589f8f137d25d44ff45"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     let EMAIL_ATUAL = "";
     let relatorioGeradoUrl = "";
+
+    function esconderAuthGate() {
+      document.getElementById("authGate")?.setAttribute("hidden", "hidden");
+    }
 
     function obterEmailUtilizador() {
       const email = normalizarEmail(auth.currentUser?.email || EMAIL_ATUAL);
@@ -32,15 +26,20 @@
       el.innerHTML = `Utilizador: <strong>${escapeHtml(email)}</strong> • Ano lectivo: <strong>2026</strong>`;
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
         return;
       }
 
       EMAIL_ATUAL = normalizarEmail(user.email);
+      if (EMAIL_ATUAL === "dc@unirovuma.ac.mz") {
+        window.location.href = "gestor.html";
+        return;
+      }
+
       if (!emailAutorizado(EMAIL_ATUAL)) {
-        signOut(auth).finally(() => {
+        await signOut(auth).finally(() => {
           window.location.href = "index.html";
         });
         return;
@@ -48,6 +47,7 @@
 
       if (EMAIL_ATUAL) {
         atualizarContextoUtilizador(EMAIL_ATUAL);
+        esconderAuthGate();
         carregarDoBackend().catch(console.error);
       }
     });
@@ -108,7 +108,7 @@
       const payload = normalizarParaAPI(a);
       console.log("PAYLOAD cadastro ->", payload);
 
-      const res = await fetch(API_URL, {
+      const res = await fetchComToken(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
@@ -135,7 +135,7 @@
       payload.email = obterEmailUtilizador();
       console.log("PAYLOAD atualizar ->", payload);
 
-      const res = await fetch(API_URL, {
+      const res = await fetchComToken(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
@@ -172,13 +172,14 @@
 
     async function carregarDoBackend(estado) {
       const email = obterEmailUtilizador();
+      // TODO Nível 2: backend deve ignorar email do cliente e usar apenas o token validado.
       const params = new URLSearchParams({ email });
       if (estado) params.set("estado", estado);
 
       const url = `${API_URL}?${params.toString()}`;
       console.log("GET listar ->", url);
 
-      const res = await fetch(url);
+      const res = await fetchComToken(url);
 
       const data = await res.json().catch(() => null);
 
@@ -864,7 +865,7 @@
         params.set("email", email);
         params.set("relatorioUrl", relatorioUrl);
 
-        const resp = await fetch(API_URL, {
+        const resp = await fetchComToken(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
           body: params.toString()
@@ -1096,7 +1097,7 @@
       let res;
       let data;
       try {
-        res = await fetch(API_URL, {
+        res = await fetchComToken(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
