@@ -15,44 +15,6 @@ export async function getIdTokenOrThrow() {
 }
 
 export async function fetchComToken(url, options = {}) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Sessão inválida");
-
-  const token = await user.getIdToken();
-  const method = (options.method || "GET").toUpperCase();
-  const finalUrl = withOrigin(url);
-
-  if (method === "POST") {
-    let originalBody = {};
-
-    if (options.body) {
-      try {
-        originalBody = JSON.parse(options.body);
-      } catch {
-        originalBody = {};
-      }
-    }
-
-    const bodyComToken = { ...originalBody, __idToken: token };
-
-    return fetch(finalUrl.toString(), {
-      ...options,
-      method,
-      headers: {
-        ...(options.headers || {}),
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify(bodyComToken)
-    });
-  }
-
-  finalUrl.searchParams.set("__idToken", token);
-
-  return fetch(finalUrl.toString(), {
-    ...options,
-    method,
-    headers: {
-      ...(options.headers || {})
-    }
-  });
+  // Teste rápido de CORS/preflight: GET sem headers, sem credentials e sem Authorization.
+  return fetch(url, { method: "GET", mode: "cors" });
 }
