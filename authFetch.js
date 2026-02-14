@@ -3,7 +3,7 @@ import { auth } from "./firebase-init.js";
 function withOrigin(url) {
   const u = new URL(url);
   u.searchParams.set("__origin", window.location.origin);
-  return u.toString();
+  return u;
 }
 
 export async function getIdTokenOrThrow() {
@@ -19,17 +19,40 @@ export async function fetchComToken(url, options = {}) {
   if (!user) throw new Error("Sessão inválida");
 
   const token = await user.getIdToken();
-
-  const headers = new Headers(options.headers || {});
-  headers.set("Authorization", `Bearer ${token}`);
-  if (!headers.has("Content-Type")) {
-    headers.set("Content-Type", "text/plain;charset=utf-8");
-  }
-
+  const method = (options.method || "GET").toUpperCase();
   const finalUrl = withOrigin(url);
 
-  return fetch(finalUrl, {
+  if (method === "POST") {
+    let originalBody = {};
+
+    if (options.body) {
+      try {
+        originalBody = JSON.parse(options.body);
+      } catch {
+        originalBody = {};
+      }
+    }
+
+    const bodyComToken = { ...originalBody, __idToken: token };
+
+    return fetch(finalUrl.toString(), {
+      ...options,
+      method,
+      headers: {
+        ...(options.headers || {}),
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(bodyComToken)
+    });
+  }
+
+  finalUrl.searchParams.set("__idToken", token);
+
+  return fetch(finalUrl.toString(), {
     ...options,
-    headers
+    method,
+    headers: {
+      ...(options.headers || {})
+    }
   });
 }
