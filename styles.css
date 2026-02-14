@@ -868,3 +868,8 @@ body.gestor-page .gestor-report-output {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 12.5px;
 }
+
+body.faculdade-page .pdf-link { text-decoration: none; }
+body.faculdade-page .pdf-ico { font-size: 18px; color: #dc2626; }
+body.faculdade-page .nao-enviado { opacity: .75; font-style: italic; }
+body.faculdade-page .info { margin-top: 8px; color: var(--muted2); }
