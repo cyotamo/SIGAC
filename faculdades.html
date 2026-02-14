@@ -44,6 +44,9 @@
           <button class="tab" id="tab-canceladas" role="tab" aria-selected="false" aria-controls="pane-canceladas" data-tab="canceladas">
             Canceladas
           </button>
+          <button class="tab" id="tab-docentes" role="tab" aria-selected="false" aria-controls="pane-docentes" data-tab="docentes">
+            Docentes
+          </button>
           <button class="tab" id="btnGerarRelatorio" type="button">
             Relatórios
           </button>
@@ -237,6 +240,26 @@
           </div>
         </div>
 
+        <!-- Pane: Docentes -->
+        <div class="pane" id="pane-docentes" role="tabpanel" aria-labelledby="tab-docentes" hidden>
+          <div class="row" style="justify-content:flex-end; margin-bottom:10px;">
+            <button class="btn" id="btnCadastrarEditarDocente" type="button">Cadastrar/Editar docente</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ord</th>
+                  <th>Nome</th>
+                  <th>Nível</th>
+                  <th>Área</th>
+                </tr>
+              </thead>
+              <tbody id="tbDocentes"></tbody>
+            </table>
+          </div>
+        </div>
+
       </section>
     </div>
   </div>
@@ -353,6 +376,67 @@
           <span class="mini" id="mInfo"></span>
           <span id="modalFeedback" class="inline-feedback" role="status" aria-live="polite"></span>
           <button class="btn" id="btnGuardarModal">Guardar alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Cadastrar/Editar docente -->
+  <div class="modal-backdrop" id="modalDocenteBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Cadastrar/Editar docente">
+      <div class="modal-h">
+        <h3>Cadastrar/Editar docente</h3>
+        <button class="btn-ghost" id="btnFecharDocente" type="button">Fechar</button>
+      </div>
+
+      <div class="modal-b">
+        <div class="grid">
+          <div class="field span2">
+            <label for="buscaDocente">Buscar docente para editar</label>
+            <input id="buscaDocente" placeholder="Digite o nome do docente..." />
+          </div>
+
+          <div class="field span2">
+            <label for="docenteSelecionado">Docente encontrado</label>
+            <select id="docenteSelecionado">
+              <option value="">Novo docente</option>
+            </select>
+          </div>
+
+          <div class="field span2">
+            <label for="docenteNome">Nome</label>
+            <input id="docenteNome" placeholder="Nome completo" required />
+          </div>
+
+          <div class="field">
+            <label for="docenteNivel">Nível</label>
+            <input id="docenteNivel" placeholder="Ex.: Doutor, Mestre" />
+          </div>
+
+          <div class="field">
+            <label for="docenteArea">Área</label>
+            <input id="docenteArea" placeholder="Ex.: Engenharia, Saúde" />
+          </div>
+
+          <div class="field">
+            <label for="docenteFormacao">Formação</label>
+            <input id="docenteFormacao" placeholder="Ex.: PhD em Educação" />
+          </div>
+
+          <div class="field">
+            <label for="docenteInstituicao">Instituição</label>
+            <input id="docenteInstituicao" placeholder="Instituição de formação" />
+          </div>
+
+          <div class="field span2">
+            <label for="docentePais">País</label>
+            <input id="docentePais" placeholder="País" />
+          </div>
+        </div>
+
+        <div class="row">
+          <span id="docenteFeedback" class="inline-feedback" role="status" aria-live="polite"></span>
+          <button class="btn" id="btnGuardarDocente" type="button">Guardar docente</button>
         </div>
       </div>
     </div>
