@@ -162,7 +162,7 @@
         inicio: item.periodoInicio,
         fim: item.periodoFim,
         nota: item.observacoes,
-        estado: item.estado,
+        estado: item.estado === "Adiada" ? "Adiar" : item.estado,
         motivo: item.motivo,
         evidenciasText: item.linkEvidencias || "",
         evidenciasCount: item.linkEvidencias ? 1 : 0,
@@ -314,9 +314,13 @@
     function chipEstado(estado){
       if (estado === "Executada") return `<span class="chip ok">● ${estado}</span>`;
       if (estado === "Cancelada" || estado === "Atrasada") return `<span class="chip bad">● ${estado}</span>`;
-      if (estado === "Adiada") return `<span class="chip warn">● ${estado}</span>`;
+      if (estado === "Adiada" || estado === "Adiar") return `<span class="chip warn">● ${estado}</span>`;
       if (estado === "Planificada") return `<span class="chip plan">● ${estado}</span>`;
       return `<span class="chip">● ${estado}</span>`;
+    }
+
+    function getNumeroOrdem(tipo, indexNaPagina) {
+      return ((state.page[tipo] - 1) * PAGE_SIZE) + indexNaPagina + 1;
     }
 
     function getRowClassByEstado(estado) {
@@ -368,22 +372,19 @@
       if (!state.cadastradas.length) {
         renderEmpty("#tbCadastradas", 8);
       } else {
-        $("#tbCadastradas").innerHTML = cadastradasPage.map(a => {
+        $("#tbCadastradas").innerHTML = cadastradasPage.map((a, idx) => {
         const estadoVisual = getEstadoVisual(a);
         return `
         <tr class="${getRowClassByEstado(estadoVisual)}">
-          <td><strong>${a.num}</strong></td>
+          <td><strong>${getNumeroOrdem("cadastradas", idx)}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
-          <td>
-            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
-            <div class="muted">${escapeHtml(a.indicador || "")}</div>
-          </td>
-          <td>${renderPeriodoComAlerta(a)}</td>
+          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td>${escapeHtml(a.local || "—")}</td>
+          <td class="periodo-cell">${renderPeriodoComAlerta(a)}</td>
           <td>${fmtMoney(a.orcamento)}</td>
-          <td>${a.fonte || "—"}</td>
           <td>${chipEstado(estadoVisual)}</td>
           <td>
-            <button class="btn-sm" onclick="openModal('${a.id}')">Editar / Estado</button>
+            <button class="btn-sm" onclick="openModal('${a.id}')">Editar</button>
           </td>
         </tr>
       `;
@@ -395,15 +396,12 @@
       if (!state.executadas.length) {
         renderEmpty("#tbExecutadas", 7);
       } else {
-        $("#tbExecutadas").innerHTML = executadasPage.map(a => `
+        $("#tbExecutadas").innerHTML = executadasPage.map((a, idx) => `
         <tr class="${getRowClassByEstado("Executada")}">
-          <td><strong>${a.num}</strong></td>
+          <td><strong>${getNumeroOrdem("executadas", idx)}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
-          <td>
-            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
-            <div class="muted">${escapeHtml(a.obj || "")}</div>
-          </td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.resp || "—")}</td>
           <td>
             ${a.evidenciasText
@@ -420,15 +418,12 @@
       if (!state.canceladas.length) {
         renderEmpty("#tbCanceladas", 6);
       } else {
-        $("#tbCanceladas").innerHTML = canceladasPage.map(a => `
+        $("#tbCanceladas").innerHTML = canceladasPage.map((a, idx) => `
         <tr class="${getRowClassByEstado("Cancelada")}">
-          <td><strong>${a.num}</strong></td>
+          <td><strong>${getNumeroOrdem("canceladas", idx)}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
-          <td>
-            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
-            <div class="muted">${escapeHtml(a.indicador || "")}</div>
-          </td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.motivo || "—")}</td>
           <td>${chipEstado("Cancelada")}</td>
         </tr>
@@ -689,7 +684,7 @@
       $("#mAccao").value = a.accao || "";
       $("#mInicio").value = a.inicio || "";
       $("#mFim").value = a.fim || "";
-      $("#mEstado").value = a.estado || "Planificada";
+      $("#mEstado").value = a.estado === "Adiada" ? "Adiar" : (a.estado || "Planificada");
       $("#mMotivo").value = a.motivo || "";
       $("#mEvidenciaUrl").value = a.evidenciasText || "";
       $("#mFicheiros").value = "";
@@ -862,7 +857,7 @@
         a.accao = payload.acao || a.accao;
         a.inicio = payload.periodoInicio || "";
         a.fim = payload.periodoFim || "";
-        a.estado = novoEstado;
+        a.estado = novoEstado === "Adiada" ? "Adiar" : novoEstado;
         a.motivo = payload.motivo || "";
         a.evidenciasCount = ficheiros;
         a.evidenciasText = data.evidenciaUrl || payload.evidenciaUrl || a.evidenciasText || "";
@@ -872,7 +867,7 @@
 
         if (novoEstado === "Executada") state.executadas.unshift(a);
         else if (novoEstado === "Cancelada") state.canceladas.unshift(a);
-        else state.cadastradas.unshift(a); // Planificada/Adiada ficam aqui
+        else state.cadastradas.unshift(a); // Planificada/Adiar ficam aqui
 
         if (modalFeedback) {
           modalFeedback.textContent = data.mensagem || "Actividade actualizada com sucesso.";
