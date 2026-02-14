@@ -530,6 +530,11 @@ body{
       font-size: 13px;
     }
 
+    body.faculdade-page .periodo-cell{
+      white-space: nowrap;
+      min-width: 190px;
+    }
+
     body.faculdade-page .area-tag{
       font-weight: 900;
       padding: 3px 8px;
