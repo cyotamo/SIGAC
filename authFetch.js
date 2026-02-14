@@ -14,7 +14,20 @@ export async function getIdTokenOrThrow() {
   return auth.currentUser.getIdToken();
 }
 
-export async function fetchComToken(url, options = {}) {
-  // Teste rápido de CORS/preflight: GET sem headers, sem credentials e sem Authorization.
-  return fetch(url, { method: "GET", mode: "cors" });
+export function carregarJSONP(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = "cb_" + Date.now();
+
+    window[callbackName] = (data) => {
+      resolve(data);
+      delete window[callbackName];
+      script.remove();
+    };
+
+    const script = document.createElement("script");
+    script.src = url + "&callback=" + callbackName;
+    script.onerror = reject;
+
+    document.body.appendChild(script);
+  });
 }

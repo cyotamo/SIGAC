@@ -1,7 +1,7 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { EMAILS_POR_FACULDADE, normalizarEmail } from "./autorizacao.js";
     import { auth } from "./firebase-init.js";
-    import { fetchComToken } from "./authFetch.js";
+    import { carregarJSONP } from "./authFetch.js";
 
     const API_URL = "https://script.google.com/macros/s/AKfycbz2uYJ7708eNcCnHonI6i0a0YQA2GiyrVId6hOO4lwuQiFyg9nlLH4FSUF7uqQNErnt_Q/exec";
 
@@ -151,12 +151,18 @@
       };
     }
 
-    async function parseBackendResponse(res) {
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data || data.sucesso !== true) {
+    async function chamarAPI(payload = {}) {
+      const params = new URLSearchParams();
+      Object.entries(payload).forEach(([chave, valor]) => {
+        if (valor === undefined || valor === null) return;
+        params.set(chave, String(valor));
+      });
+
+      const data = await carregarJSONP(`${API_URL}?${params.toString()}`);
+      if (!data || data.sucesso !== true) {
         console.log("RESPOSTA API ->", data);
         const detalhes = (data && (data.erros ? data.erros.join(" | ") : data.mensagem))
-          || (data && data.httpStatus ? `HTTP ${data.httpStatus}` : `HTTP ${res.status}`);
+          || (data && data.httpStatus ? `HTTP ${data.httpStatus}` : "Erro ao contactar API");
         throw new Error(detalhes);
       }
       return data;
@@ -166,13 +172,7 @@
       const payload = normalizarParaAPI(a);
       console.log("PAYLOAD cadastro ->", payload);
 
-      const res = await fetchComToken(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-
-      return parseBackendResponse(res);
+      return chamarAPI(payload);
     }
 
     function fileToBase64SemPrefixo(file) {
@@ -193,13 +193,7 @@
       payload.email = obterEmailUtilizador();
       console.log("PAYLOAD atualizar ->", payload);
 
-      const res = await fetchComToken(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-
-      return parseBackendResponse(res);
+      return chamarAPI(payload);
     }
 
     function normalizarDoBackend(item, idx) {
@@ -238,13 +232,11 @@
       const url = `${API_URL}?${params.toString()}`;
       console.log("GET listar ->", url);
 
-      const res = await fetchComToken(url);
+      const data = await carregarJSONP(url);
 
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data || data.sucesso !== true || !Array.isArray(data.dados)) {
+      if (!data || data.sucesso !== true || !Array.isArray(data.dados)) {
         console.log("RESPOSTA listar ->", data);
-        throw new Error((data && data.mensagem) || `HTTP ${res.status}`);
+        throw new Error((data && data.mensagem) || "Erro ao carregar dados");
       }
 
       if (data.sheet) {
@@ -302,8 +294,7 @@
       let data;
 
       try {
-        const resp = await fetchComToken(url, { method: "GET" });
-        data = await resp.json();
+        data = await carregarJSONP(url);
       } catch (_) {
         if (msgEl) msgEl.textContent = "Falha ao carregar relatórios.";
         return;
@@ -885,17 +876,9 @@
 
       Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
-      let res;
       let data;
       try {
-        res = await fetchComToken(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-
-        const txt = await res.text();
-        data = JSON.parse(txt);
+        data = await chamarAPI(payload);
       } catch (err) {
         if (feedback) {
           feedback.textContent = "Falha de rede ao gerar relatório. Verifica a ligação e tenta novamente.";
@@ -905,8 +888,8 @@
         return;
       }
 
-      if (!res.ok || !data || data.sucesso !== true) {
-        const msg = (data && data.mensagem) ? data.mensagem : `Erro HTTP ${res.status}`;
+      if (!data || data.sucesso !== true) {
+        const msg = (data && data.mensagem) ? data.mensagem : "Erro ao gerar relatório";
         if (feedback) {
           feedback.textContent = msg;
           feedback.classList.add("is-error");
