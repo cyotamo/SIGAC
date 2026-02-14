@@ -227,7 +227,12 @@ const API_URL = WEB_URL;
       const emailAtual = obterEmailUtilizador();
       const email = state.emailParaBackend || emailAtual;
       // TODO Nível 2: backend deve ignorar email do cliente e usar apenas o token validado.
-      const params = new URLSearchParams({ email });
+      const params = new URLSearchParams();
+      params.set("email", email);
+      // Regra especial para DC
+      if (email === "dc@unirovuma.ac.mz") {
+        params.set("operacao", "listar_relatorios_dc");
+      }
       if (estado) params.set("estado", estado);
 
       const url = `${API_URL}?${params.toString()}`;
