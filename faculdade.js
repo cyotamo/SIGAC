@@ -3,7 +3,7 @@
     import { auth } from "./firebase-init.js";
     import { fetchComToken } from "./authFetch.js";
 
-    const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbx07X24yPmZ2GI5_dqnDwKG4cdkVtRBJeXNuTUqcVkfdq1sZSsWNb718Mqx6cEeCIBRlA/exec";
 
     let EMAIL_ATUAL = "";
     let relatorioGeradoUrl = "";
