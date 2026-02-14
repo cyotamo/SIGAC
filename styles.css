@@ -49,10 +49,11 @@ body{
 .brand{
   display:flex;
   align-items:center;
-  gap:14px;
+  justify-content:center;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(203,213,225,.5);
   margin-bottom: 12px;
+  text-align:center;
 }
 
 .logo{
@@ -156,7 +157,7 @@ body{
 
 /* Mobile */
 @media (max-width:420px){
-  .brand{ align-items:flex-start; }
+  .brand{ align-items:center; }
   .logo{ width:52px; height:52px; border-radius:16px; }
 }
 
