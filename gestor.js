@@ -352,45 +352,69 @@
 
     async function carregarRelatoriosEnviadosDC_() {
       const email = obterEmailSessao_();
-      if (!email) throw new Error("Email não encontrado na sessão.");
+      const tbody = document.getElementById("tbodyRelatoriosDc");
+      const msgEl = document.getElementById("relatoriosDcMsg");
+      if (!tbody) return;
 
-      const tbody = document.getElementById("tbRelatoriosEnviados");
-      const fb = document.getElementById("relatoriosEnviadosFeedback");
-      if (!tbody || !fb) return;
+      if (!isDC_(email)) {
+        mostrarSemPermissaoRelatorios_();
+        return;
+      }
 
       tbody.innerHTML = "";
-      fb.textContent = "A carregar...";
+      if (msgEl) msgEl.textContent = "A carregar...";
 
       const url = `${API_URL}?op=listar_relatorios_dc&email=${encodeURIComponent(email)}`;
       console.log("URL Relatórios DC:", url);
-      const resp = await fetch(url);
-      const data = await resp.json();
+      let data;
 
-      if (!resp.ok || !data?.sucesso || !Array.isArray(data.dados)) {
-        throw new Error(data?.mensagem || `HTTP ${resp.status}`);
+      try {
+        const resp = await fetch(url, { method: "GET" });
+        data = await resp.json();
+      } catch (_) {
+        if (msgEl) msgEl.textContent = "Falha ao carregar relatórios.";
+        return;
       }
 
-      tbody.innerHTML = data.dados.map((item) => {
-        const tem = !!item.relatorioUrl;
-        const rel = tem
-          ? `<a href="${escapeHtml(item.relatorioUrl)}" target="_blank" rel="noopener">📄 PDF</a>`
-          : `<span class="muted">Não enviado</span>`;
+      if (!data?.sucesso) {
+        if (msgEl) msgEl.textContent = data?.mensagem || "Erro ao carregar relatórios.";
+        return;
+      }
 
-        const dt = item.enviadoEm
-          ? new Date(item.enviadoEm).toLocaleString("pt-PT")
-          : `<span class="muted">—</span>`;
+      const dados = Array.isArray(data.dados) ? data.dados : [];
+      if (!dados.length) {
+        if (msgEl) msgEl.textContent = "Nenhum registo encontrado.";
+        return;
+      }
+
+      tbody.innerHTML = dados.map((item) => {
+        const ord = escapeHtml_(item.ord ?? "");
+        const unidade = escapeHtml_(item.unidadeOrganica ?? "");
+        const urlPdf = String(item.url || "").trim();
+        const dataEnvio = escapeHtml_(String(item.dataEnvio || "").trim());
+
+        const relatorioHtml = urlPdf
+          ? `<a href="${escapeHtml_(urlPdf)}" target="_blank" rel="noopener" class="pdf-link" title="Abrir PDF"><span class="pdf-ico" aria-label="PDF">📄</span></a>`
+          : `<span class="nao-enviado">Não enviado</span>`;
 
         return `
           <tr>
-            <td>${escapeHtml(item.ord ?? "")}</td>
-            <td>${escapeHtml(item.faculdade ?? "")}</td>
-            <td>${rel}</td>
-            <td>${dt}</td>
+            <td>${ord}</td>
+            <td>${unidade}</td>
+            <td>${relatorioHtml}</td>
+            <td>${dataEnvio}</td>
           </tr>
         `;
       }).join("");
 
-      fb.textContent = "";
+      if (msgEl) msgEl.textContent = "";
+    }
+
+    function mostrarSemPermissaoRelatorios_() {
+      const msgEl = document.getElementById("relatoriosDcMsg");
+      const tbody = document.getElementById("tbodyRelatoriosDc");
+      if (tbody) tbody.innerHTML = "";
+      if (msgEl) msgEl.textContent = "Sem permissão.";
     }
 
     // ---------------------------
@@ -531,6 +555,10 @@
         .replaceAll("'","&#039;");
     }
 
+    function escapeHtml_(str){
+      return escapeHtml(str);
+    }
+
     // ---------------------------
     // Tabs
     // ---------------------------
@@ -568,17 +596,17 @@
             if (isDC_(email)) return;
             await carregarDoBackend();
           } else if (tab === "relatorios-enviados") {
-            if (isDC_(email)) {
-              await carregarRelatoriosEnviadosDC_();
-            } else {
-              await carregarDoBackend();
+            if (!isDC_(email)) {
+              mostrarSemPermissaoRelatorios_();
+              return;
             }
+            await carregarRelatoriosEnviadosDC_();
           }
         } catch (err) {
           console.error(err);
           if (tab === "relatorios-enviados") {
-            document.getElementById("relatoriosEnviadosFeedback").textContent =
-              (err && err.message) ? err.message : "Erro ao carregar relatórios.";
+            const msgEl = document.getElementById("relatoriosDcMsg");
+            if (msgEl) msgEl.textContent = (err && err.message) ? err.message : "Erro ao carregar relatórios.";
           }
         }
       });
