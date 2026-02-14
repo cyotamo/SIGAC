@@ -329,7 +329,7 @@
     function renderLoading(tbodyId, colspan) {
       const tbody = $(tbodyId);
       if (!tbody) return;
-      tbody.innerHTML = `<tr><td colspan="${colspan}" class="muted loading-cell">Carregar<span class="loading-dots" aria-hidden="true">...</span></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${colspan}" class="muted loading-cell">A carregar<span class="loading-dots" aria-hidden="true">....</span></td></tr>`;
     }
 
     function renderEmpty(tbodyId, colspan) {
@@ -559,8 +559,25 @@
       $("#benefTotal").value = String(total);
     }
 
+    function updateOrcamentoTotal() {
+      const valorEstado = parseCurrencyInputToNumber($("#orcamentoEstado").value);
+      const valorExterno = parseCurrencyInputToNumber($("#orcamentoExterno").value);
+      const total = valorEstado + valorExterno;
+      $("#orcamento").value = formatCurrencyWithDots(Math.round(total * 100));
+    }
+
+    function obterFonteFinanciamento() {
+      const valorEstado = parseCurrencyInputToNumber($("#orcamentoEstado").value);
+      const valorExterno = parseCurrencyInputToNumber($("#orcamentoExterno").value);
+      if (valorEstado > 0 && valorExterno > 0) return "OE+Externo";
+      if (valorEstado > 0) return "OE";
+      if (valorExterno > 0) return "Externo";
+      return "OE";
+    }
+
     ["#t1", "#t2", "#t3", "#t4", "#benefH", "#benefM"].forEach(aplicarMascaraNumericaInteira);
-    aplicarMascaraOrcamento("#orcamento");
+    aplicarMascaraOrcamento("#orcamentoEstado");
+    aplicarMascaraOrcamento("#orcamentoExterno");
     habilitarNavegacaoPorSetasNoFormulario();
 
     document.addEventListener("click", (event) => {
@@ -578,6 +595,12 @@
     ["#benefH", "#benefM"].forEach((selector) => {
       $(selector).addEventListener("input", updateBeneficiariosTotal);
     });
+
+    ["#orcamentoEstado", "#orcamentoExterno"].forEach((selector) => {
+      $(selector).addEventListener("input", updateOrcamentoTotal);
+    });
+
+    updateOrcamentoTotal();
 
     // ---------------------------
     // Cadastro
@@ -610,7 +633,7 @@
         local: $("#local").value.trim(),
         benef: { total: $("#benefTotal").value.trim(), h: $("#benefH").value.trim(), m: $("#benefM").value.trim() },
         orcamento: parseCurrencyInputToNumber($("#orcamento").value.trim()).toFixed(2),
-        fonte: $("#fonte").value,
+        fonte: obterFonteFinanciamento(),
         resp: $("#resp").value.trim(),
         inicio: $("#inicio").value,
         fim: $("#fim").value,
@@ -630,9 +653,9 @@
 
         form.reset();
         $("#area").value = "Pós-Graduação";
-        $("#fonte").value = "OE";
         updateMetaAnual();
         updateBeneficiariosTotal();
+        updateOrcamentoTotal();
 
         if (cadastroFeedback) {
           cadastroFeedback.textContent = "Dados enviados com sucesso!";
