@@ -15,7 +15,7 @@
         <div class="logo">SIGAC</div>
         <div style="min-width:0">
           <h1>Cadastro de Actividades — Módulo da Faculdade</h1>
-          <p id="ctx">Faculdade: <strong>FACEE</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>facee@unirovuma.ac.mz</strong></p>
+          <p id="ctx">Utilizador: <strong>facee@unirovuma.ac.mz</strong> • Ano lectivo: <strong>2026</strong></p>
         </div>
       </div>
 
@@ -29,7 +29,7 @@
       <section class="card content">
         <div class="tabs" role="tablist" aria-label="Menu de gestão">
           <button class="tab" id="tab-cadastro" role="tab" aria-selected="true" aria-controls="pane-cadastro" data-tab="cadastro">
-            Cadastro
+            Cadastro (Plano)
           </button>
           <button class="tab" id="tab-cadastradas" role="tab" aria-selected="false" aria-controls="pane-cadastradas" data-tab="cadastradas">
             Planificadas
@@ -49,7 +49,7 @@
         <div class="pane active" id="pane-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
           <div class="card-h">
             <h2>Cadastro (Plano)</h2>
-            <p>Registe as actividades do plano anual conforme a grelha. Após gravar, entram em <strong>Actividades Cadastradas</strong>.</p>
+            <p>Registe as actividades do plano anual conforme a grelha.</p>
           </div>
 
           <div class="card-b">
@@ -188,6 +188,7 @@
               </thead>
               <tbody id="tbCadastradas"></tbody>
             </table>
+            <div class="pagination" id="paginationCadastradas"></div>
           </div>
         </div>
 
@@ -208,6 +209,7 @@
               </thead>
               <tbody id="tbExecutadas"></tbody>
             </table>
+            <div class="pagination" id="paginationExecutadas"></div>
           </div>
         </div>
 
@@ -227,6 +229,7 @@
               </thead>
               <tbody id="tbCanceladas"></tbody>
             </table>
+            <div class="pagination" id="paginationCanceladas"></div>
           </div>
         </div>
 
@@ -271,7 +274,6 @@
               <option value="doc">.doc</option>
               <option value="pdf" selected>PDF</option>
             </select>
-            <div class="mini">Nesta versão demo, o relatório é gerado em HTML para impressão/guardar como PDF.</div>
           </div>
         </div>
 
