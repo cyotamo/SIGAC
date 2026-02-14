@@ -1,6 +1,7 @@
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { EMAILS_POR_FACULDADE, emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { EMAILS_POR_FACULDADE, normalizarEmail } from "./autorizacao.js";
+    import { auth } from "./firebase-init.js";
+    import { fetchComToken } from "./authFetch.js";
 
     const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
 
@@ -9,49 +10,18 @@
       Object.entries(EMAILS_POR_FACULDADE).map(([email, faculdade]) => [faculdade, email])
     );
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC-z5eNHi-rosi0Ak64bPeQZU-6oJA9DDk",
-      authDomain: "sigacur00.firebaseapp.com",
-      projectId: "sigacur00",
-      storageBucket: "sigacur00.firebasestorage.app",
-      messagingSenderId: "224944945440",
-      appId: "1:224944945440:web:743589f8f137d25d44ff45"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     let EMAIL_ATUAL = "";
 
     function obterEmailSessao_() {
-      // 1) tenta o helper existente
-      try {
-        const ctx = (typeof obterContextoLogin === "function") ? obterContextoLogin() : null;
-        const e1 = String(ctx?.email || "").trim().toLowerCase();
-        if (e1) return e1;
-      } catch (_) {}
-
-      // 2) tenta localStorage (ajusta as chaves se no teu projecto forem diferentes)
-      const chaves = ["contextoLogin", "ctxLogin", "loginContext", "auth", "session"];
-      for (const k of chaves) {
-        try {
-          const raw = localStorage.getItem(k);
-          if (!raw) continue;
-          const obj = JSON.parse(raw);
-          const e2 = String(obj?.email || obj?.user?.email || "").trim().toLowerCase();
-          if (e2) return e2;
-        } catch (_) {}
-      }
-
-      // 3) fallback para o fluxo actual deste projecto
-      const e3 = normalizarEmail(localStorage.getItem("utilizador") || EMAIL_ATUAL || auth.currentUser?.email || "");
-      if (e3) return e3;
-
-      // 4) nada encontrado
-      return "";
+      return normalizarEmail(auth.currentUser?.email || EMAIL_ATUAL);
     }
 
     function isDC_(email) {
-      return String(email || "").trim().toLowerCase() === "dc@unirovuma.ac.mz";
+      return normalizarEmail(email) === "dc@unirovuma.ac.mz";
+    }
+
+    function esconderAuthGate() {
+      document.getElementById("authGate")?.setAttribute("hidden", "hidden");
     }
 
     function obterEmailUtilizador() {
@@ -62,39 +32,14 @@
       return email;
     }
 
-    function guardarContextoLogin(contexto = {}) {
-      Object.entries(contexto).forEach(([chave, valor]) => {
-        localStorage.setItem(chave, String(valor ?? ""));
-      });
-    }
-
-    function obterContextoLogin(email, faculdadeOverride) {
-      const emailNormalizado = normalizarEmail(email);
-      const faculdadeGuardada = localStorage.getItem("faculdade") || "";
-      const anoLectivoGuardado = localStorage.getItem("anoLectivo") || "2026";
-      const utilizadorGuardado = normalizarEmail(localStorage.getItem("utilizador") || emailNormalizado);
-      const seccaoGuardada = localStorage.getItem("seccao") || "";
-
-      const faculdade = faculdadeOverride || faculdadeGuardada || faculdadePorEmail(emailNormalizado) || "N/D";
-      const contexto = {
-        faculdade,
-        anoLectivo: anoLectivoGuardado,
-        utilizador: utilizadorGuardado || emailNormalizado,
-        seccao: seccaoGuardada || faculdade
-      };
-
-      guardarContextoLogin(contexto);
-      return contexto;
-    }
-
-    function atualizarContextoUtilizador(email) {
+    function atualizarContextoUtilizador() {
       const el = document.getElementById("ctx");
       if (!el) return;
 
       el.textContent = "Utilizador: dc@unirovuma.ac.mz • Ano lectivo: 2026 Sessão: DC.";
     }
 
-    function atualizarContextoFaculdade(nomeFaculdade) {
+    function atualizarContextoFaculdade() {
       const el = document.getElementById("ctx");
       if (!el) return;
       el.textContent = "Utilizador: dc@unirovuma.ac.mz • Ano lectivo: 2026 Sessão: DC.";
@@ -114,38 +59,27 @@
       filtro.innerHTML = faculdades
         .map((faculdade) => `<option value="${escapeHtml(faculdade)}">${escapeHtml(faculdade)}</option>`)
         .join("");
-
-      const faculdadeAtual = faculdadePorEmail(EMAIL_ATUAL);
-      if (faculdadeAtual) {
-        filtro.value = faculdadeAtual;
-      }
+      filtro.value = "DC";
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
         return;
       }
 
       EMAIL_ATUAL = normalizarEmail(user.email);
-      if (!emailAutorizado(EMAIL_ATUAL)) {
-        signOut(auth).finally(() => {
-          window.location.href = "index.html";
-        });
+      if (EMAIL_ATUAL !== "dc@unirovuma.ac.mz") {
+        await signOut(auth);
+        window.location.href = "index.html";
         return;
       }
 
-      if (EMAIL_ATUAL) {
-        atualizarContextoUtilizador(EMAIL_ATUAL);
-        preencherFiltroFaculdades();
+      atualizarContextoUtilizador();
+      preencherFiltroFaculdades();
+      esconderAuthGate();
 
-        const email = obterEmailSessao_();
-        if (isDC_(email)) {
-          return;
-        }
-
-        carregarDoBackend().catch(console.error);
-      }
+      carregarDoBackend().catch(console.error);
     });
 
     document.getElementById("btnAplicarFiltroFaculdade")?.addEventListener("click", async () => {
@@ -232,7 +166,7 @@
       const payload = normalizarParaAPI(a);
       console.log("PAYLOAD cadastro ->", payload);
 
-      const res = await fetch(API_URL, {
+      const res = await fetchComToken(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
@@ -259,7 +193,7 @@
       payload.email = obterEmailUtilizador();
       console.log("PAYLOAD atualizar ->", payload);
 
-      const res = await fetch(API_URL, {
+      const res = await fetchComToken(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
@@ -297,13 +231,14 @@
     async function carregarDoBackend(estado) {
       const emailAtual = obterEmailUtilizador();
       const email = state.emailParaBackend || emailAtual;
+      // TODO Nível 2: backend deve ignorar email do cliente e usar apenas o token validado.
       const params = new URLSearchParams({ email });
       if (estado) params.set("estado", estado);
 
       const url = `${API_URL}?${params.toString()}`;
       console.log("GET listar ->", url);
 
-      const res = await fetch(url);
+      const res = await fetchComToken(url);
 
       const data = await res.json().catch(() => null);
 
@@ -361,12 +296,13 @@
       tbody.innerHTML = `<tr><td colspan="4" class="muted loading-cell">A carregar<span class="loading-dots" aria-hidden="true">....</span></td></tr>`;
       if (msgEl) msgEl.textContent = "";
 
+      // TODO Nível 2: backend deve ignorar email do cliente e usar apenas o token validado.
       const url = `${API_URL}?op=listar_relatorios_dc&email=${encodeURIComponent(email)}`;
       console.log("URL Relatórios DC:", url);
       let data;
 
       try {
-        const resp = await fetch(url, { method: "GET" });
+        const resp = await fetchComToken(url, { method: "GET" });
         data = await resp.json();
       } catch (_) {
         if (msgEl) msgEl.textContent = "Falha ao carregar relatórios.";
@@ -630,25 +566,13 @@
         switchTab(tab);
 
         try {
-          const email = obterEmailSessao_();
-
           if (tab === "canceladas") {
-            if (isDC_(email)) return;
             await carregarDoBackend("Cancelada");
           } else if (tab === "executadas") {
-            if (isDC_(email)) return;
             await carregarDoBackend("Executada");
-          } else if (tab === "cadastradas") {
-            if (isDC_(email)) return;
-            await carregarDoBackend();
-          } else if (tab === "estatisticas") {
-            if (isDC_(email)) return;
+          } else if (tab === "cadastradas" || tab === "estatisticas") {
             await carregarDoBackend();
           } else if (tab === "relatorios-enviados") {
-            if (!isDC_(email)) {
-              mostrarSemPermissaoRelatorios_();
-              return;
-            }
             await carregarRelatoriosEnviadosDC_();
           }
         } catch (err) {
@@ -964,7 +888,7 @@
       let res;
       let data;
       try {
-        res = await fetch(API_URL, {
+        res = await fetchComToken(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)

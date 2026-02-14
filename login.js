@@ -1,26 +1,10 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { auth } from "./firebase-init.js";
 import { emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyC-z5eNHi-rosi0Ak64bPeQZU-6oJA9DDk",
-  authDomain: "sigacur00.firebaseapp.com",
-  projectId: "sigacur00",
-  storageBucket: "sigacur00.firebasestorage.app",
-  messagingSenderId: "224944945440",
-  appId: "1:224944945440:web:743589f8f137d25d44ff45"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
 const ANO_LECTIVO = "2026";
 
