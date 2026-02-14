@@ -315,6 +315,11 @@ body{
       to { transform: rotate(360deg); }
     }
 
+    @keyframes faculdade-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .35; }
+    }
+
     body.faculdade-page .btn-ghost{
       border:1px solid rgba(219,234,254,.95);
       background:#fff;
@@ -504,8 +509,39 @@ body{
       white-space:nowrap;
     }
     body.faculdade-page .chip.ok{ border-color: rgba(22,163,74,.35); background: rgba(22,163,74,.10); color: #166534; }
+    body.faculdade-page .chip.plan{ border-color: rgba(59,130,246,.35); background: rgba(59,130,246,.11); color: #1d4ed8; }
     body.faculdade-page .chip.warn{ border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.12); color: #92400e; }
     body.faculdade-page .chip.bad{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); color: #991b1b; }
+
+    body.faculdade-page .status-row-planificada td{ background: rgba(59,130,246,.06); }
+    body.faculdade-page .status-row-executada td{ background: rgba(22,163,74,.08); }
+    body.faculdade-page .status-row-cancelada td{ background: rgba(239,68,68,.08); }
+
+    body.faculdade-page .loading-cell{
+      color: #60a5fa;
+      font-weight: 900;
+      animation: faculdade-blink 1.1s ease-in-out infinite;
+    }
+    body.faculdade-page .loading-dots{ letter-spacing: 1px; }
+
+    body.faculdade-page .period-alert{
+      margin-left: 4px;
+      color: #f59e0b;
+      font-size: 13px;
+    }
+
+    body.faculdade-page .area-tag{
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      display: inline-flex;
+    }
+    body.faculdade-page .area-tag.is-extensao{ color: #0369a1; background: rgba(14,165,233,.12); border-color: rgba(14,165,233,.28); }
+    body.faculdade-page .area-tag.is-posgraduacao{ color: #6d28d9; background: rgba(124,58,237,.12); border-color: rgba(124,58,237,.28); }
+    body.faculdade-page .area-tag.is-pesquisa{ color: #166534; background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.28); }
+    body.faculdade-page .area-tag.is-publicacao{ color: #9a3412; background: rgba(249,115,22,.12); border-color: rgba(249,115,22,.28); }
+    body.faculdade-page .area-tag.is-area-default{ color: #334155; background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.28); }
 
     body.faculdade-page .btn-sm{
       border:1px solid rgba(219,234,254,.95);
