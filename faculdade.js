@@ -1,6 +1,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { emailAutorizado, faculdadePorEmail, normalizarEmail } from "./autorizacao.js";
+    import { emailAutorizado, normalizarEmail } from "./autorizacao.js";
 
     const API_URL = "https://script.google.com/macros/s/AKfycby6p9tqSV9FxD7L0I8VbLsrTbMRupMq9Ump-hXF8k415qL2K45PAjmxwi0QvYhXFQT5Mw/exec";
 
@@ -29,8 +29,7 @@
     function atualizarContextoUtilizador(email) {
       const el = document.getElementById("ctx");
       if (!el) return;
-      const faculdade = faculdadePorEmail(email) || "N/D";
-      el.innerHTML = `Faculdade: <strong>${faculdade}</strong> • Ano lectivo: <strong>2026</strong> • Utilizador: <strong>${escapeHtml(email)}</strong>`;
+      el.innerHTML = `Utilizador: <strong>${escapeHtml(email)}</strong> • Ano lectivo: <strong>2026</strong>`;
     }
 
     onAuthStateChanged(auth, (user) => {
@@ -220,17 +219,39 @@
       cadastradas: [],
       executadas: [],
       canceladas: [],
-      currentEdit: null
+      currentEdit: null,
+      page: {
+        cadastradas: 1,
+        executadas: 1,
+        canceladas: 1
+      }
     };
+
+    const PAGE_SIZE = 10;
 
     const $ = (s) => document.querySelector(s);
     const parsePositiveNumber = (value) => {
-      const sanitized = String(value || "").replace(",", ".").trim();
+      const sanitized = String(value || "").replace(/[^\d.-]/g, "").replace(",", ".").trim();
       const n = Number(sanitized);
       return Number.isFinite(n) && n > 0 ? n : 0;
     };
+    const parseCurrencyInputToNumber = (value) => {
+      const digits = String(value || "").replace(/\D+/g, "");
+      if (!digits) return 0;
+      return Number(digits) / 100;
+    };
+    const formatCurrencyWithDots = (value) => {
+      const digits = String(value || "").replace(/\D+/g, "");
+      if (!digits) return "";
+      const padded = digits.padStart(3, "0");
+      const cents = padded.slice(-2);
+      let integer = padded.slice(0, -2).replace(/^0+(?=\d)/, "");
+      if (!integer) integer = "0";
+      integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      return `${integer}.${cents}`;
+    };
     const fmtMoney = (v) => {
-      const n = Number(String(v || "0").replace(",", "."));
+      const n = parseCurrencyInputToNumber(v);
       if (Number.isNaN(n)) return "—";
       return n.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " MZN";
     };
@@ -248,9 +269,49 @@
       if (estado === "Adiada") return `<span class="chip warn">● ${estado}</span>`;
       return `<span class="chip">● ${estado}</span>`;
     }
+    function renderLoading(tbodyId, colspan) {
+      const tbody = $(tbodyId);
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="${colspan}" class="muted">A carregar</td></tr>`;
+    }
+
+    function renderEmpty(tbodyId, colspan) {
+      const tbody = $(tbodyId);
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="${colspan}" class="muted">Sem dados</td></tr>`;
+    }
+
+    function renderPagination(tipo, total) {
+      const el = $(`#pagination${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+      if (!el) return;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      const currentPage = Math.min(state.page[tipo], totalPages);
+      state.page[tipo] = currentPage;
+      el.innerHTML = `
+        <button type="button" class="btn-sm" data-page="prev" data-tipo="${tipo}" ${currentPage <= 1 ? "disabled" : ""}>&lt;</button>
+        <span>${currentPage} de ${totalPages}</span>
+        <button type="button" class="btn-sm" data-page="next" data-tipo="${tipo}" ${currentPage >= totalPages ? "disabled" : ""}>&gt;</button>
+      `;
+    }
+
+    function paginar(lista, tipo) {
+      const totalPages = Math.max(1, Math.ceil(lista.length / PAGE_SIZE));
+      const page = Math.min(state.page[tipo], totalPages);
+      state.page[tipo] = page;
+      const start = (page - 1) * PAGE_SIZE;
+      return lista.slice(start, start + PAGE_SIZE);
+    }
+
     function render(){
+      const cadastradasPage = paginar(state.cadastradas, "cadastradas");
+      const executadasPage = paginar(state.executadas, "executadas");
+      const canceladasPage = paginar(state.canceladas, "canceladas");
+
       // Cadastradas
-      $("#tbCadastradas").innerHTML = state.cadastradas.map(a => `
+      if (!state.cadastradas.length) {
+        renderEmpty("#tbCadastradas", 8);
+      } else {
+        $("#tbCadastradas").innerHTML = cadastradasPage.map(a => `
         <tr>
           <td><strong>${a.num}</strong></td>
           <td>${a.area}</td>
@@ -267,9 +328,14 @@
           </td>
         </tr>
       `).join("");
+      }
+      renderPagination("cadastradas", state.cadastradas.length);
 
       // Executadas
-      $("#tbExecutadas").innerHTML = state.executadas.map(a => `
+      if (!state.executadas.length) {
+        renderEmpty("#tbExecutadas", 7);
+      } else {
+        $("#tbExecutadas").innerHTML = executadasPage.map(a => `
         <tr>
           <td><strong>${a.num}</strong></td>
           <td>${a.area}</td>
@@ -287,9 +353,14 @@
           <td>${chipEstado("Executada")}</td>
         </tr>
       `).join("");
+      }
+      renderPagination("executadas", state.executadas.length);
 
       // Canceladas
-      $("#tbCanceladas").innerHTML = state.canceladas.map(a => `
+      if (!state.canceladas.length) {
+        renderEmpty("#tbCanceladas", 6);
+      } else {
+        $("#tbCanceladas").innerHTML = canceladasPage.map(a => `
         <tr>
           <td><strong>${a.num}</strong></td>
           <td>${a.area}</td>
@@ -302,6 +373,8 @@
           <td>${chipEstado("Cancelada")}</td>
         </tr>
       `).join("");
+      }
+      renderPagination("canceladas", state.canceladas.length);
 
     }
 
@@ -337,10 +410,13 @@
 
         try {
           if (tab === "canceladas") {
+            renderLoading("#tbCanceladas", 6);
             await carregarDoBackend("Cancelada");
           } else if (tab === "executadas") {
+            renderLoading("#tbExecutadas", 7);
             await carregarDoBackend("Executada");
           } else if (tab === "cadastradas") {
+            renderLoading("#tbCadastradas", 8);
             await carregarDoBackend();
           }
         } catch (err) {
@@ -370,6 +446,46 @@
       });
     }
 
+    function aplicarMascaraOrcamento(selector) {
+      const input = $(selector);
+      if (!input) return;
+
+      input.addEventListener("input", () => {
+        input.value = formatCurrencyWithDots(input.value);
+      });
+
+      input.addEventListener("paste", (event) => {
+        event.preventDefault();
+        const texto = event.clipboardData?.getData("text") || "";
+        input.value = formatCurrencyWithDots(texto);
+      });
+    }
+
+    function habilitarNavegacaoPorSetasNoFormulario() {
+      const form = $("#formCadastro");
+      if (!form) return;
+
+      const campos = () => Array.from(form.querySelectorAll("input, select, textarea"))
+        .filter((el) => !el.disabled && el.type !== "hidden" && el.id !== "metaAnual" && el.id !== "benefTotal");
+
+      form.addEventListener("keydown", (event) => {
+        if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(event.key)) return;
+        const lista = campos();
+        const index = lista.indexOf(event.target);
+        if (index < 0) return;
+
+        const nextIndex = (event.key === "ArrowRight" || event.key === "ArrowDown") ? index + 1 : index - 1;
+        const destino = lista[nextIndex];
+        if (!destino) return;
+
+        event.preventDefault();
+        destino.focus();
+        if (typeof destino.select === "function" && destino.tagName === "INPUT") {
+          destino.select();
+        }
+      });
+    }
+
     function updateMetaAnual(){
       const total = ["#t1", "#t2", "#t3", "#t4"]
         .map((selector) => parsePositiveNumber($(selector).value))
@@ -384,6 +500,16 @@
     }
 
     ["#t1", "#t2", "#t3", "#t4", "#benefH", "#benefM"].forEach(aplicarMascaraNumericaInteira);
+    aplicarMascaraOrcamento("#orcamento");
+    habilitarNavegacaoPorSetasNoFormulario();
+
+    document.addEventListener("click", (event) => {
+      const btn = event.target.closest("button[data-page][data-tipo]");
+      if (!btn) return;
+      const { page, tipo } = btn.dataset;
+      state.page[tipo] += page === "next" ? 1 : -1;
+      render();
+    });
 
     ["#t1", "#t2", "#t3", "#t4"].forEach((selector) => {
       $(selector).addEventListener("input", updateMetaAnual);
@@ -423,7 +549,7 @@
         metas: { t1: $("#t1").value.trim(), t2: $("#t2").value.trim(), t3: $("#t3").value.trim(), t4: $("#t4").value.trim() },
         local: $("#local").value.trim(),
         benef: { total: $("#benefTotal").value.trim(), h: $("#benefH").value.trim(), m: $("#benefM").value.trim() },
-        orcamento: $("#orcamento").value.trim(),
+        orcamento: parseCurrencyInputToNumber($("#orcamento").value.trim()).toFixed(2),
         fonte: $("#fonte").value,
         resp: $("#resp").value.trim(),
         inicio: $("#inicio").value,
