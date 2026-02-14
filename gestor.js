@@ -91,16 +91,13 @@
       const el = document.getElementById("ctx");
       if (!el) return;
 
-      const contexto = obterContextoLogin(email);
-      el.textContent = `Faculdade: ${contexto.faculdade} • Ano lectivo: ${contexto.anoLectivo} • Utilizador: ${contexto.utilizador} • Secção: ${contexto.seccao}`;
+      el.textContent = "Utilizador: dc@unirovuma.ac.mz • Ano lectivo: 2026 Sessão: DC.";
     }
 
     function atualizarContextoFaculdade(nomeFaculdade) {
       const el = document.getElementById("ctx");
       if (!el) return;
-
-      const contexto = obterContextoLogin(obterEmailUtilizador(), nomeFaculdade || undefined);
-      el.textContent = `Faculdade: ${contexto.faculdade} • Ano lectivo: ${contexto.anoLectivo} • Utilizador: ${contexto.utilizador} • Secção: ${contexto.seccao}`;
+      el.textContent = "Utilizador: dc@unirovuma.ac.mz • Ano lectivo: 2026 Sessão: DC.";
     }
 
     function setCtxLoading(isLoading, faculdade = "") {
@@ -361,8 +358,8 @@
         return;
       }
 
-      tbody.innerHTML = "";
-      if (msgEl) msgEl.textContent = "A carregar...";
+      tbody.innerHTML = `<tr><td colspan="4" class="muted loading-cell">A carregar<span class="loading-dots" aria-hidden="true">....</span></td></tr>`;
+      if (msgEl) msgEl.textContent = "";
 
       const url = `${API_URL}?op=listar_relatorios_dc&email=${encodeURIComponent(email)}`;
       console.log("URL Relatórios DC:", url);
@@ -394,7 +391,7 @@
         const dataEnvio = escapeHtml_(String(item.dataEnvio || "").trim());
 
         const relatorioHtml = urlPdf
-          ? `<a href="${escapeHtml_(urlPdf)}" target="_blank" rel="noopener" class="pdf-link" title="Abrir PDF"><span class="pdf-ico" aria-label="PDF">📄</span></a>`
+          ? `<a href="${escapeHtml_(urlPdf)}" target="_blank" rel="noopener" class="pdf-link" title="Abrir PDF"><span class="pdf-ico" aria-label="PDF">📕</span></a>`
           : `<span class="nao-enviado">Não enviado</span>`;
 
         return `
@@ -445,12 +442,69 @@
       return `${a} → ${b}`;
     };
 
+    function toDateOnly(dateValue) {
+      if (!dateValue) return null;
+      const d = new Date(dateValue);
+      if (Number.isNaN(d.getTime())) return null;
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function getEstadoVisual(a) {
+      const estado = String(a?.estado || "").trim();
+      if (estado !== "Planificada") return estado || "Planificada";
+
+      const hoje = toDateOnly(new Date());
+      const fim = toDateOnly(a?.fim || a?.inicio);
+      if (hoje && fim && hoje > fim) return "Atrasada";
+
+      return "Planificada";
+    }
+
+    function renderPeriodoComAlerta(a) {
+      const textoPeriodo = fmtPeriodo(a?.inicio, a?.fim);
+      const estadoVisual = getEstadoVisual(a);
+      if (estadoVisual !== "Planificada") return textoPeriodo;
+
+      const hoje = toDateOnly(new Date());
+      const inicio = toDateOnly(a?.inicio);
+      if (!hoje || !inicio) return textoPeriodo;
+
+      const msPorDia = 1000 * 60 * 60 * 24;
+      const diasAteInicio = Math.round((inicio.getTime() - hoje.getTime()) / msPorDia);
+      if (diasAteInicio < 0 || diasAteInicio > 7) return textoPeriodo;
+
+      return `${textoPeriodo} <span class="period-alert" title="Execução prevista nos próximos 7 dias">⚠️</span>`;
+    }
+
+    function getAreaClass(area = "") {
+      const key = String(area).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      if (key.includes("extensao")) return "is-extensao";
+      if (key.includes("pos-graduacao") || key.includes("pos graduacao") || key.includes("posgraduacao")) return "is-posgraduacao";
+      if (key.includes("pesquisa")) return "is-pesquisa";
+      if (key.includes("publicacao")) return "is-publicacao";
+      return "is-area-default";
+    }
+
+    function renderAreaTag(area = "") {
+      return `<span class="area-tag ${getAreaClass(area)}">${escapeHtml(area || "—")}</span>`;
+    }
+
     function chipEstado(estado){
       if (estado === "Executada") return `<span class="chip ok">● ${estado}</span>`;
-      if (estado === "Cancelada") return `<span class="chip bad">● ${estado}</span>`;
-      if (estado === "Adiada") return `<span class="chip warn">● ${estado}</span>`;
+      if (estado === "Cancelada" || estado === "Atrasada") return `<span class="chip bad">● ${estado}</span>`;
+      if (estado === "Adiada" || estado === "Adiar") return `<span class="chip warn">● ${estado}</span>`;
+      if (estado === "Planificada") return `<span class="chip plan">● ${estado}</span>`;
       return `<span class="chip">● ${estado}</span>`;
     }
+
+    function getRowClassByEstado(estado) {
+      if (estado === "Executada") return "status-row status-row-executada";
+      if (estado === "Cancelada" || estado === "Atrasada") return "status-row status-row-cancelada";
+      if (estado === "Planificada") return "status-row status-row-planificada";
+      return "status-row";
+    }
+
     function render(){
       renderEmptyRow("#tbCadastradas", state.cadastradas.length, "Sem registos planificados.");
       renderEmptyRow("#tbExecutadas", state.executadas.length, "Sem registos executados.");
@@ -458,36 +512,32 @@
 
       // Cadastradas
       if (state.cadastradas.length) {
-      $("#tbCadastradas").innerHTML = state.cadastradas.map(a => `
-        <tr>
-          <td><strong>${a.num}</strong></td>
-          <td>${a.area}</td>
-          <td>
-            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
-            <div class="muted">${escapeHtml(a.indicador || "")}</div>
-          </td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+      $("#tbCadastradas").innerHTML = state.cadastradas.map((a, idx) => {
+        const estadoVisual = getEstadoVisual(a);
+        return `
+        <tr class="${getRowClassByEstado(estadoVisual)}">
+          <td><strong>${idx + 1}</strong></td>
+          <td>${renderAreaTag(a.area)}</td>
+          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td>${escapeHtml(a.local || "—")}</td>
+          <td class="periodo-cell">${renderPeriodoComAlerta(a)}</td>
           <td>${fmtMoney(a.orcamento)}</td>
-          <td>${a.fonte || "—"}</td>
-          <td>${chipEstado(a.estado)}</td>
-          <td>
-            <button class="btn-sm" onclick="openModal('${a.id}')">Editar / Estado</button>
-          </td>
+          <td>${chipEstado(estadoVisual)}</td>
         </tr>
-      `).join("");
+      `;
+      }).join("");
       }
 
       // Executadas
       if (state.executadas.length) {
-      $("#tbExecutadas").innerHTML = state.executadas.map(a => `
-        <tr>
-          <td><strong>${a.num}</strong></td>
-          <td>${a.area}</td>
+      $("#tbExecutadas").innerHTML = state.executadas.map((a, idx) => `
+        <tr class="${getRowClassByEstado("Executada")}">
+          <td><strong>${idx + 1}</strong></td>
+          <td>${renderAreaTag(a.area)}</td>
           <td>
             <div style="font-weight:900">${escapeHtml(a.accao)}</div>
-            <div class="muted">${escapeHtml(a.obj || "")}</div>
           </td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.resp || "—")}</td>
           <td>
             ${a.evidenciasText
@@ -501,15 +551,14 @@
 
       // Canceladas
       if (state.canceladas.length) {
-      $("#tbCanceladas").innerHTML = state.canceladas.map(a => `
-        <tr>
-          <td><strong>${a.num}</strong></td>
-          <td>${a.area}</td>
+      $("#tbCanceladas").innerHTML = state.canceladas.map((a, idx) => `
+        <tr class="${getRowClassByEstado("Cancelada")}">
+          <td><strong>${idx + 1}</strong></td>
+          <td>${renderAreaTag(a.area)}</td>
           <td>
             <div style="font-weight:900">${escapeHtml(a.accao)}</div>
-            <div class="muted">${escapeHtml(a.indicador || "")}</div>
           </td>
-          <td>${fmtPeriodo(a.inicio, a.fim)}</td>
+          <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.motivo || "—")}</td>
           <td>${chipEstado("Cancelada")}</td>
         </tr>
@@ -538,7 +587,7 @@
       if (!tbody) return;
 
       const colSpanBySelector = {
-        "#tbCadastradas": 8,
+        "#tbCadastradas": 7,
         "#tbExecutadas": 7,
         "#tbCanceladas": 6
       };
