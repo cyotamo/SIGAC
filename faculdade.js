@@ -416,9 +416,50 @@ let docentesRemotos = false;
       return lista.slice(start, start + PAGE_SIZE);
     }
 
+    function obterAbaAtual() {
+      return document.querySelector('.tab[aria-selected="true"]')?.dataset?.tab || "cadastro";
+    }
+
     function render(){
       if (!docentesRemotos) {
         carregarDocentesLocal();
+      }
+
+      const abaAtual = obterAbaAtual();
+
+      if (abaAtual === "docentes") {
+        if (state.docentes.length === 0) {
+          document.querySelector("#theadDocentes").innerHTML = "";
+          renderEmpty("#tbDocentes", 14);
+          return;
+        }
+
+        const headers = Object.keys(state.docentes[0]);
+
+        let headHtml = "<tr>";
+
+        headers.forEach((h) => {
+          headHtml += `<th>${h}</th>`;
+        });
+
+        headHtml += "</tr>";
+
+        document.querySelector("#theadDocentes").innerHTML = headHtml;
+
+        let html = "";
+
+        state.docentes.forEach((doc) => {
+          html += "<tr>";
+
+          Object.values(doc).forEach((valor) => {
+            html += `<td>${valor ?? ""}</td>`;
+          });
+
+          html += "</tr>";
+        });
+
+        document.querySelector("#tbDocentes").innerHTML = html;
+        return;
       }
 
       const cadastradasPage = paginar(state.cadastradas, "cadastradas");
@@ -487,39 +528,6 @@ let docentesRemotos = false;
       `).join("");
       }
       renderPagination("canceladas", state.canceladas.length);
-
-      // Docentes
-      if (state.docentes.length === 0) {
-        document.querySelector("#theadDocentes").innerHTML = "";
-        renderEmpty("#tbDocentes", 14);
-        return;
-      }
-
-      const headers = Object.keys(state.docentes[0]);
-
-      let headHtml = "<tr>";
-
-      headers.forEach((h) => {
-        headHtml += `<th>${h}</th>`;
-      });
-
-      headHtml += "</tr>";
-
-      document.querySelector("#theadDocentes").innerHTML = headHtml;
-
-      let html = "";
-
-      state.docentes.forEach((doc) => {
-        html += "<tr>";
-
-        Object.values(doc).forEach((valor) => {
-          html += `<td>${valor ?? ""}</td>`;
-        });
-
-        html += "</tr>";
-      });
-
-      document.querySelector("#tbDocentes").innerHTML = html;
 
     }
 
