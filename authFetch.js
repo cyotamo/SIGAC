@@ -35,6 +35,7 @@ export function carregarJSONP(url) {
 export async function postJSON(url, payload = {}) {
   const response = await fetch(url, {
     method: "POST",
+    mode: "no-cors",
     headers: {
       "Content-Type": "application/json",
     },
