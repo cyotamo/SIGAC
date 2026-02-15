@@ -667,6 +667,7 @@ let docentesRemotos = false;
         switchTab(tab);
 
         if (tab === "docentes") {
+          console.log("botao clicado");
           console.log("[DOCENTES] antes de carregarDocentesBackend");
           await carregarDocentesBackend();
           return;
