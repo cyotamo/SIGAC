@@ -12,7 +12,22 @@ function doGet(e) {
     const email = String(p.email || "").trim().toLowerCase();
 
     if (operacao === "gerar_relatorio_faculdade" || operacao === "gerar_relatorio") {
-      return jsonp_(gerarRelatorioFaculdade_(e), e);
+      const emailRelatorio = normalizarEmailRelatorio_(p.email);
+      const faculdadeRelatorio = mapearFaculdadeRelatorioPorEmail_(emailRelatorio);
+
+      if (!faculdadeRelatorio) {
+        return jsonp_({
+          sucesso: false,
+          httpStatus: 400,
+          mensagem: `Email não autorizado para relatórios: ${emailRelatorio}`
+        }, e);
+      }
+
+      const eventoRelatorio = {
+        parameter: Object.assign({}, p, { email: emailRelatorio, faculdadeRelatorio })
+      };
+
+      return jsonp_(gerarRelatorioFaculdade_(eventoRelatorio), e);
     }
 
     if (operacao === "enviar_relatorio_dc") {
@@ -105,11 +120,12 @@ function gerarRelatorioFaculdade_(e) {
   const formato = String(p.formato || "pdf").trim().toLowerCase();
   const dataInicio = porPeriodo ? String(p.dataInicio || "").trim() : "";
   const dataFim = porPeriodo ? String(p.dataFim || "").trim() : "";
-  const email = String(p.email || "").trim().toLowerCase();
+  const email = normalizarEmailRelatorio_(p.email);
 
   return gerarRelatorio({
     operacao: "gerar_relatorio_faculdade",
     email,
+    faculdadeRelatorio: p.faculdadeRelatorio,
     formato,
     opcao,
     porPeriodo,

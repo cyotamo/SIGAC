@@ -1061,8 +1061,10 @@ const API_URL = WEB_URL;
 
     async function gerarRelatorioViaAPI({ tipo, inicio, fim, formato }) {
       const feedback = $("#relatorioFeedback");
+      const email = obterEmailUtilizador();
 
       console.log("relatorioTipo.value =", tipo);
+      console.log("EMAIL_RELATORIO", email);
 
       const formatoBack = (formato === "xls") ? "xlsx" : formato;
       const porPeriodo = Boolean(inicio && fim);
@@ -1071,7 +1073,7 @@ const API_URL = WEB_URL;
       try {
         const payload = {
           operacao: "gerar_relatorio_faculdade",
-          email: obterEmailUtilizador(),
+          email,
           formato: formatoBack,
           opcao: normalizarOpcaoRelatorioFront_(tipo),
           tipoRelatorio: normalizarOpcaoRelatorioFront_(tipo),
