@@ -1,7 +1,7 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { emailAutorizado, normalizarEmail } from "./autorizacao.js";
     import { auth } from "./firebase-init.js";
-    import { carregarJSONP, postJSON } from "./authFetch.js";
+    import { carregarJSONP } from "./authFetch.js";
 const WEB_URL = "https://script.google.com/macros/s/AKfycbzMav1xi6lVQE9FULhU9N6geYU0UnSdOQznp_pCsHUDT-awUFm1ghgy4-3-4wBbQgE45g/exec";
 const API_URL = WEB_URL;
 
@@ -102,7 +102,8 @@ const API_URL = WEB_URL;
         "criar",
         "atualizar",
         "gerar_relatorio",
-        "gerar_relatorio_faculdade"
+        "gerar_relatorio_faculdade",
+        "listar_docentes"
       ];
 
       if (!operacoesValidas.includes(operacao)) {
@@ -117,6 +118,22 @@ const API_URL = WEB_URL;
         throw new Error(detalhes);
       }
       return data;
+    }
+
+    async function postJSON(url, payload) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        throw new Error("Falha HTTP: " + res.status);
+      }
+
+      return res.json();
     }
 
     async function enviarParaBackend(a) {
@@ -214,6 +231,27 @@ const API_URL = WEB_URL;
       });
 
       render();
+    }
+
+    async function carregarDocentesBackend() {
+      const email = obterEmailUtilizador();
+      if (!email) return;
+
+      try {
+        const resp = await postJSON(API_URL, {
+          operacao: "listar_docentes",
+          email: email
+        });
+
+        if (resp && resp.sucesso && Array.isArray(resp.dados)) {
+          state.docentes = resp.dados;
+          render();
+        } else {
+          console.warn("Resposta inválida listar_docentes", resp);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar docentes:", err);
+      }
     }
 
     // ---------------------------
@@ -553,6 +591,10 @@ const API_URL = WEB_URL;
         const tab = btn.dataset.tab;
         if (!tab) return;
         switchTab(tab);
+
+        if (tab === "docentes") {
+          await carregarDocentesBackend();
+        }
 
         try {
           if (tab === "canceladas") {
