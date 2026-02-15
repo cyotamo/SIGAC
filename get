@@ -39,6 +39,14 @@ function doGet(e) {
     const operacao = String(p.operacao || p.op || "").trim().toLowerCase();
     const email = String(p.email || "").trim().toLowerCase();
 
+    if (operacao === "gerar_relatorio_faculdade" || operacao === "gerar_relatorio") {
+      return jsonp_(gerarRelatorioFaculdade_(e), e);
+    }
+
+    if (operacao === "enviar_relatorio_dc") {
+      return jsonp_(enviarRelatorioDc_(p), e);
+    }
+
     if (!email) {
       return jsonp_({ sucesso: false, httpStatus: 400, mensagem: "Email não enviado (use ?email=...)." }, e);
     }
@@ -115,6 +123,28 @@ function doGet(e) {
       mensagem: String(err?.message || err)
     }, e);
   }
+}
+
+function gerarRelatorioFaculdade_(e) {
+  const p = (e && e.parameter) || {};
+
+  const porPeriodo = String(p.porPeriodo || "").trim().toLowerCase() === "true";
+  const opcao = String(p.tipoRelatorio || p.opcao || "Todas").trim();
+  const formato = String(p.formato || "pdf").trim().toLowerCase();
+  const dataInicio = porPeriodo ? String(p.dataInicio || "").trim() : "";
+  const dataFim = porPeriodo ? String(p.dataFim || "").trim() : "";
+  const email = String(p.email || "").trim().toLowerCase();
+
+  return gerarRelatorio({
+    operacao: "gerar_relatorio_faculdade",
+    email,
+    formato,
+    opcao,
+    porPeriodo,
+    dataInicio,
+    dataFim,
+    titulo: String(p.titulo || "Relatório de Actividades").trim()
+  });
 }
 
 
@@ -198,7 +228,6 @@ function jsonCore_(obj, statusCode, e) {
   const origin = pickOrigin_(e);
   return applyCors_(out, origin);
 }
-
 
 
 

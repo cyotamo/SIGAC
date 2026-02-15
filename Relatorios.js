@@ -1,7 +1,7 @@
 // @ts-ignore
 /*************************************************************
  * API: GERAR RELATÓRIO (PDF / DOC / XLSX)
- * Endpoint (WebApp): POST ?acao=gerar_relatorio
+ * Endpoint (WebApp): GET JSONP (?operacao=gerar_relatorio_faculdade&callback=...)
  *************************************************************/
 
 // ========= CONFIGURAÇÃO (AJUSTA AQUI) =========
@@ -42,8 +42,8 @@ const CFG = {
 // ========= FUNÇÃO PRINCIPAL =========
 function gerarRelatorio(payload) {
   const formato = normLower(payload.formato || "pdf");
-  const opcao = String(payload.opcao || "Todas").trim();
-  const porPeriodo = Boolean(payload.porPeriodo);
+  const opcao = String(payload.opcao || payload.tipoRelatorio || "Todas").trim();
+  const porPeriodo = toBoolean_(payload.porPeriodo);
   const dataInicio = porPeriodo ? parseISODate(payload.dataInicio) : null;
   const dataFim = porPeriodo ? parseISODate(payload.dataFim) : null;
   const titulo = String(payload.titulo || "Relatório de Actividades").trim();
@@ -98,6 +98,13 @@ function gerarRelatorio(payload) {
     formato,
     ficheiro: out
   };
+}
+
+
+function toBoolean_(value) {
+  if (typeof value === "boolean") return value;
+  const t = String(value || "").trim().toLowerCase();
+  return t === "true" || t === "1" || t === "sim";
 }
 
 // ========= OBTENÇÃO + FILTRO =========
