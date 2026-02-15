@@ -49,7 +49,10 @@ let docentesRemotos = false;
       if (EMAIL_ATUAL) {
         atualizarContextoUtilizador(EMAIL_ATUAL);
         esconderAuthGate();
-        carregarDoBackend().catch(console.error);
+        const abaAtual = obterAbaAtual();
+        if (["cadastradas", "executadas", "canceladas"].includes(abaAtual)) {
+          carregarDoBackend().catch(console.error);
+        }
       }
     });
 
