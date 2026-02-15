@@ -4,6 +4,7 @@
     import { carregarJSONP } from "./authFetch.js";
 const WEB_URL = "https://script.google.com/macros/s/AKfycbzMav1xi6lVQE9FULhU9N6geYU0UnSdOQznp_pCsHUDT-awUFm1ghgy4-3-4wBbQgE45g/exec";
 const API_URL = WEB_URL;
+let docentesRemotos = false;
 
     let EMAIL_ATUAL = "";
     let relatorioGeradoUrl = "";
@@ -251,6 +252,7 @@ const API_URL = WEB_URL;
           console.log("DADOS RECEBIDOS:", resp.dados);
 
           state.docentes = resp.dados;
+          docentesRemotos = true;
 
           console.log("STATE DOCENTES:", state.docentes);
 
@@ -415,6 +417,10 @@ const API_URL = WEB_URL;
     }
 
     function render(){
+      if (!docentesRemotos) {
+        carregarDocentesLocal();
+      }
+
       const cadastradasPage = paginar(state.cadastradas, "cadastradas");
       const executadasPage = paginar(state.executadas, "executadas");
       const canceladasPage = paginar(state.canceladas, "canceladas");
@@ -1327,6 +1333,5 @@ const API_URL = WEB_URL;
     }
 
     // Start
-    carregarDocentesLocal();
     render();
   
