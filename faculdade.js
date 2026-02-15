@@ -474,18 +474,37 @@ const API_URL = WEB_URL;
       renderPagination("canceladas", state.canceladas.length);
 
       // Docentes
-      if (!state.docentes.length) {
-        renderEmpty("#tbDocentes", 4);
-      } else {
-        $("#tbDocentes").innerHTML = state.docentes.map((d, idx) => `
-          <tr>
-            <td><strong>${idx + 1}</strong></td>
-            <td>${escapeHtml(d.nome || "—")}</td>
-            <td>${escapeHtml(d.nivel || "—")}</td>
-            <td>${escapeHtml(d.area || "—")}</td>
-          </tr>
-        `).join("");
+      if (state.docentes.length === 0) {
+        document.querySelector("#theadDocentes").innerHTML = "";
+        renderEmpty("#tbDocentes", 14);
+        return;
       }
+
+      const headers = Object.keys(state.docentes[0]);
+
+      let headHtml = "<tr>";
+
+      headers.forEach((h) => {
+        headHtml += `<th>${h}</th>`;
+      });
+
+      headHtml += "</tr>";
+
+      document.querySelector("#theadDocentes").innerHTML = headHtml;
+
+      let html = "";
+
+      state.docentes.forEach((doc) => {
+        html += "<tr>";
+
+        Object.values(doc).forEach((valor) => {
+          html += `<td>${valor ?? ""}</td>`;
+        });
+
+        html += "</tr>";
+      });
+
+      document.querySelector("#tbDocentes").innerHTML = html;
 
     }
 
