@@ -51,8 +51,13 @@ function gerarRelatorio(e) {
   const dataFim = p.dataFim;
   const titulo = String(p.titulo || "Relatório de Actividades").trim();
 
-  const email = String(p.email || "").trim().toLowerCase();
+  const email = normalizarEmailRelatorio_(p.email);
   if (!email) throw new Error("Email não foi enviado no payload.");
+
+  const faculdadeCodigo = p.faculdadeRelatorio || mapearFaculdadeRelatorioPorEmail_(email);
+  if (!faculdadeCodigo) {
+    throw new Error(`Email não autorizado para relatórios: ${email}`);
+  }
 
   const nomeFaculdade = getNomeFaculdadeByEmail_(email);
   const inicio = porPeriodo ? new Date(dataInicio) : null;
@@ -71,7 +76,7 @@ function gerarRelatorio(e) {
   Logger.log({ tipoRelatorio, porPeriodo, dataInicio, dataFim });
 
   // 1) Ler e filtrar dados (AGORA PASSA O EMAIL)
-  const registos = obterRegistosFiltrados({ opcao, porPeriodo, dataInicio: inicio, dataFim: fim, email });
+  const registos = obterRegistosFiltrados({ opcao, porPeriodo, dataInicio: inicio, dataFim: fim, email, faculdadeCodigo });
   if (!registos.length) throw new Error("Nenhum registo encontrado para os critérios seleccionados.");
 
   // 2) Gerar ficheiro
@@ -114,12 +119,25 @@ function toBoolean_(value) {
   return t === "true" || t === "1" || t === "sim";
 }
 
+function normalizarEmailRelatorio_(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function mapearFaculdadeRelatorioPorEmail_(email) {
+  const mapa = {
+    "facee@unirovuma.ac.mz": "FACEE",
+    "fcsf@unirovuma.ac.mz": "FCSF"
+  };
+
+  return mapa[normalizarEmailRelatorio_(email)] || null;
+}
+
 // ========= OBTENÇÃO + FILTRO =========
-function obterRegistosFiltrados({ opcao, porPeriodo, dataInicio, dataFim, email }) {
+function obterRegistosFiltrados({ opcao, porPeriodo, dataInicio, dataFim, email, faculdadeCodigo }) {
   const ss = SpreadsheetApp.openById(CFG.SPREADSHEET_ID);
 
-  const nomeSheet = getSheetByEmail_(email);
-  if (!nomeSheet) throw new Error("Email não autorizado.");
+  const nomeSheet = faculdadeCodigo || mapearFaculdadeRelatorioPorEmail_(email);
+  if (!nomeSheet) throw new Error(`Email não autorizado para relatórios: ${normalizarEmailRelatorio_(email)}`);
 
   const sh = ss.getSheetByName(nomeSheet);
   if (!sh) throw new Error(`Aba não encontrada: ${nomeSheet}`);
