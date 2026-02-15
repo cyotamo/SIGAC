@@ -1,7 +1,7 @@
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { emailAutorizado, normalizarEmail } from "./autorizacao.js";
     import { auth } from "./firebase-init.js";
-    import { carregarJSONP } from "./authFetch.js";
+    import { carregarJSONP, postJSON } from "./authFetch.js";
 const WEB_URL = "https://script.google.com/macros/s/AKfycby40Ip2EaukgknFTPDVV9cP3kDMJA_OESvXSk9GS6cMwUgUgnEtYLTiY78HE_vie359_A/exec";
 const API_URL = WEB_URL;
 
@@ -94,13 +94,7 @@ const API_URL = WEB_URL;
     }
 
     async function chamarAPI(payload = {}) {
-      const params = new URLSearchParams();
-      Object.entries(payload).forEach(([chave, valor]) => {
-        if (valor === undefined || valor === null) return;
-        params.set(chave, String(valor));
-      });
-
-      const data = await carregarJSONP(`${API_URL}?${params.toString()}`);
+      const data = await postJSON(API_URL, payload);
       if (!data || data.sucesso !== true) {
         console.log("RESPOSTA API ->", data);
         const detalhes = (data && (data.erros ? data.erros.join(" | ") : data.mensagem))
