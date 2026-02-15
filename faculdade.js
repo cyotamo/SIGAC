@@ -1068,6 +1068,21 @@ const API_URL = WEB_URL;
       return tipo;
     }
 
+    function garantirDataISO(valor) {
+      const s = String(valor || "").trim();
+      if (!s) return "";
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+      const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (m) {
+        const [, dd, mm, yyyy] = m;
+        return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+      }
+
+      return s;
+    }
+
     async function gerarRelatorioViaAPI({ tipo, inicio, fim, formato }) {
       const feedback = $("#relatorioFeedback");
       const userEmail = obterEmailUtilizador();
@@ -1077,8 +1092,8 @@ const API_URL = WEB_URL;
 
       const opcao = normalizarOpcaoRelatorioFront_(tipo);
       const porPeriodo = Boolean(inicio && fim);
-      const di = porPeriodo ? inicio : undefined;
-      const df = porPeriodo ? fim : undefined;
+      const dataInicio = porPeriodo ? garantirDataISO(inicio) : undefined;
+      const dataFim = porPeriodo ? garantirDataISO(fim) : undefined;
 
       let data;
       try {
@@ -1087,8 +1102,8 @@ const API_URL = WEB_URL;
           email: userEmail,
           opcao,
           porPeriodo,
-          di,
-          df
+          dataInicio,
+          dataFim
         });
       } catch (err) {
         if (feedback) {
@@ -1136,8 +1151,10 @@ const API_URL = WEB_URL;
       const fim = $("#relatorioFim").value;
       const formato = $("#relatorioFormato").value;
       const feedback = $("#relatorioFeedback");
+      const inicioISO = garantirDataISO(inicio);
+      const fimISO = garantirDataISO(fim);
 
-      if (inicio && fim && inicio > fim) {
+      if (inicioISO && fimISO && inicioISO > fimISO) {
         if (feedback) {
           feedback.textContent = "O período é inválido: a data de início deve ser anterior ou igual à data de fim.";
           feedback.classList.add("is-error");
@@ -1151,7 +1168,7 @@ const API_URL = WEB_URL;
         feedback.classList.remove("is-error");
       }
 
-      await gerarRelatorioViaAPI({ tipo, inicio, fim, formato });
+      await gerarRelatorioViaAPI({ tipo, inicio: inicioISO, fim: fimISO, formato });
     });
 
     function filtrarActividadesRelatorio(tipo){
