@@ -1080,6 +1080,16 @@ const API_URL = WEB_URL;
         Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
         data = await chamarAPI(payload);
+        console.log("LISTAR raw response:", data);
+        console.log("LISTAR json completo:", data);
+        console.log("LISTAR data.ficheiro:", data?.ficheiro);
+        console.log("LISTAR candidatos url:", {
+          ficheiro_url: data?.ficheiro?.url,
+          url: data?.url,
+          link: data?.link,
+          ficheiro_link: data?.ficheiro?.link,
+          files0: data?.files?.[0]?.url
+        });
       } catch (err) {
         if (feedback) {
           feedback.textContent = "Falha de rede ao gerar relatório. Verifica a ligação e tenta novamente.";
