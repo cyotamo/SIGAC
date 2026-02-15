@@ -628,6 +628,7 @@ let docentesRemotos = false;
 
         if (tab === "docentes") {
           await carregarDocentesBackend();
+          return;
         }
 
         try {
