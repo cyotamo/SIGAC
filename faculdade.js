@@ -49,6 +49,18 @@ let docentesRemotos = false;
       if (EMAIL_ATUAL) {
         atualizarContextoUtilizador(EMAIL_ATUAL);
         esconderAuthGate();
+
+        const tabAtiva = document.querySelector(".tab.active")?.dataset?.tab
+          || document.querySelector('.tab[aria-selected="true"]')?.dataset?.tab
+          || "cadastradas";
+        console.log("[INIT] tabAtiva =", tabAtiva);
+
+        if (tabAtiva === "docentes") {
+          console.log("[INIT] Docentes activo: não chamar carregarDoBackend (JSONP).");
+          await carregarDocentesBackend();
+          return;
+        }
+
         const abaAtual = obterAbaAtual();
         if (["cadastradas", "executadas", "canceladas"].includes(abaAtual)) {
           console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
@@ -196,6 +208,13 @@ let docentesRemotos = false;
     }
 
     async function carregarDoBackend(estado) {
+      const tabAtiva = document.querySelector(".tab.active")?.dataset?.tab
+        || document.querySelector('.tab[aria-selected="true"]')?.dataset?.tab;
+      if (tabAtiva === "docentes") {
+        console.log("[BLOQUEADO] carregarDoBackend enquanto Docentes está activo");
+        return;
+      }
+
       const email = obterEmailUtilizador();
       // TODO Nível 2: backend deve ignorar email do cliente e usar apenas o token validado.
       const params = new URLSearchParams({ email });
