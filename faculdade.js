@@ -51,6 +51,7 @@ let docentesRemotos = false;
         esconderAuthGate();
         const abaAtual = obterAbaAtual();
         if (["cadastradas", "executadas", "canceladas"].includes(abaAtual)) {
+          console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
           carregarDoBackend().catch(console.error);
         }
       }
@@ -203,6 +204,7 @@ let docentesRemotos = false;
       const url = `${API_URL}?${params.toString()}`;
       console.log("GET listar ->", url);
 
+      console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
       const data = await carregarJSONP(url);
 
       if (!data || data.sucesso !== true || !Array.isArray(data.dados)) {
@@ -238,18 +240,24 @@ let docentesRemotos = false;
     }
 
     async function carregarDocentesBackend() {
+      console.log("[DOCENTES] entrou carregarDocentesBackend");
       const email = obterEmailUtilizador();
+      console.log("[DOCENTES] email", obterEmailUtilizador());
+      console.log("[DOCENTES] API_URL", API_URL);
       console.log("EMAIL:", email);
 
       if (!email) return;
 
       try {
-        const resp = await postJSON(API_URL, {
+        const payload = {
           operacao: "listar_docentes",
           email: email
-        });
+        };
+        console.log("[DOCENTES] vai enviar POST", payload);
+        const resp = await postJSON(API_URL, payload);
 
         console.log("RESPOSTA BACK:", resp);
+        console.log("[DOCENTES] resposta", resp);
 
         if (resp && resp.sucesso) {
           console.log("DADOS RECEBIDOS:", resp.dados);
@@ -260,6 +268,7 @@ let docentesRemotos = false;
           console.log("STATE DOCENTES:", state.docentes);
 
           render();
+          console.log("[DOCENTES] tbody rows", document.querySelectorAll("#tbDocentes tr").length);
         } else {
           console.warn("Resposta inválida listar_docentes", resp);
         }
@@ -634,10 +643,12 @@ let docentesRemotos = false;
     document.querySelectorAll(".tab").forEach(btn => {
       btn.addEventListener("click", async () => {
         const tab = btn.dataset.tab;
+        console.log("[TAB CLICK]", { tab, target: btn, time: Date.now() });
         if (!tab) return;
         switchTab(tab);
 
         if (tab === "docentes") {
+          console.log("[DOCENTES] antes de carregarDocentesBackend");
           await carregarDocentesBackend();
           return;
         }
@@ -645,12 +656,15 @@ let docentesRemotos = false;
         try {
           if (tab === "canceladas") {
             renderLoading("#tbCanceladas", 6);
+            console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
             await carregarDoBackend("Cancelada");
           } else if (tab === "executadas") {
             renderLoading("#tbExecutadas", 7);
+            console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
             await carregarDoBackend("Executada");
           } else if (tab === "cadastradas") {
             renderLoading("#tbCadastradas", 8);
+            console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
             await carregarDoBackend();
           }
         } catch (err) {
@@ -823,6 +837,7 @@ let docentesRemotos = false;
         if (submitButton) submitButton.disabled = true;
 
         await enviarParaBackend(a);
+        console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
         await carregarDoBackend();
 
         form.reset();
@@ -954,6 +969,7 @@ let docentesRemotos = false;
         params.set("email", email);
         params.set("relatorioUrl", relatorioUrl);
 
+        console.log("[TRACE GET] chamarDoBackend/JSONP", new Error().stack);
         const data = await carregarJSONP(`${API_URL}?${params.toString()}`);
         if (!data?.sucesso) {
           throw new Error(data?.mensagem || "Erro ao enviar relatório");
