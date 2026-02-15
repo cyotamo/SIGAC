@@ -1,0 +1,208 @@
+// ===== CORS (DEV + PROD) =====
+const ALLOWED_ORIGINS = [
+  "https://sigacur00.web.app",
+  "https://sigacur00.firebaseapp.com",
+  "https://cyotamo.github.io"
+];
+
+// Usa __origin enviado pelo frontend (mais fiável no Apps Script)
+function pickOrigin_(e) {
+  const p = (e && e.parameter) ? e.parameter : {};
+  const origin = String(p.__origin || "").trim();
+  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+}
+
+function applyCors_(out, origin) {
+  out.setHeader("Access-Control-Allow-Origin", origin);
+  out.setHeader("Vary", "Origin");
+  out.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  out.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  out.setHeader("Access-Control-Max-Age", "3600");
+  return out;
+}
+
+// Preflight (browser OPTIONS)
+function doOptions(e) {
+  const origin = pickOrigin_(e);
+  // Resposta vazia/OK para preflight
+  const out = ContentService.createTextOutput("");
+  out.setMimeType(ContentService.MimeType.TEXT);
+  return applyCors_(out, origin);
+}
+
+
+
+function doGet(e) {
+  try {
+    const p = (e && e.parameter) || {};
+
+    const operacao = String(p.operacao || p.op || "").trim().toLowerCase();
+    const email = String(p.email || "").trim().toLowerCase();
+
+    if (!email) {
+      return jsonp_({ sucesso: false, httpStatus: 400, mensagem: "Email não enviado (use ?email=...)." }, e);
+    }
+
+    const nomeSheet = getSheetByEmail_(email);
+    if (!nomeSheet) {
+      return jsonp_({ sucesso: false, httpStatus: 403, mensagem: "Email sem permissão." }, e);
+    }
+
+    // DC: só pode listar relatórios
+    if (operacao === "listar_relatorios_dc") {
+      if (nomeSheet !== "__DC__") {
+        return jsonp_({ sucesso: false, httpStatus: 403, mensagem: "Email sem permissão." }, e);
+      }
+      return jsonp_(listarRelatoriosDc_(), e);
+    }
+
+    if (nomeSheet === "__DC__") {
+      return jsonp_({ sucesso: false, httpStatus: 403, mensagem: "A conta DC só pode usar a operação listar_relatorios_dc." }, e);
+    }
+
+    const ss = SPREADSHEET_ID
+      ? SpreadsheetApp.openById(SPREADSHEET_ID)
+      : SpreadsheetApp.getActiveSpreadsheet();
+
+    const sh = ss.getSheetByName(nomeSheet);
+    if (!sh) {
+      return jsonp_({ sucesso: false, httpStatus: 404, mensagem: `Sheet '${nomeSheet}' não existe.` }, e);
+    }
+
+    const lastRow = sh.getLastRow();
+    if (lastRow < 2) {
+      return jsonp_({
+        sucesso: true,
+        httpStatus: 200,
+        sheet: nomeSheet,
+        faculdadeCodigo: nomeSheet,
+        faculdadeNome: getNomeFaculdadeByEmail_(email),
+        filtro: null,
+        total: 0,
+        dados: []
+      }, e);
+    }
+
+    const estadoFiltro = String(p.estado || "").trim();
+    const idxEstado = COLS.indexOf("estado");
+
+    const values = sh.getRange(2, 1, lastRow - 1, COLS.length).getValues();
+
+    const dados = values
+      .filter(r => r.some(v => v !== "" && v !== null))
+      .filter(r => {
+        if (!estadoFiltro || idxEstado < 0) return true;
+        const estadoLinha = String(r[idxEstado] ?? "").trim();
+        return estadoLinha.localeCompare(estadoFiltro, undefined, { sensitivity: "accent" }) === 0;
+      })
+      .map(rowToObj_);
+
+    return jsonp_({
+      sucesso: true,
+      httpStatus: 200,
+      sheet: nomeSheet,
+      faculdadeCodigo: nomeSheet,
+      faculdadeNome: getNomeFaculdadeByEmail_(email),
+      filtro: estadoFiltro ? { estado: estadoFiltro } : null,
+      total: dados.length,
+      dados
+    }, e);
+
+  } catch (err) {
+    return jsonp_({
+      sucesso: false,
+      httpStatus: 500,
+      mensagem: String(err?.message || err)
+    }, e);
+  }
+}
+
+
+
+
+
+function listarRelatoriosDc_() {
+  const ss = SPREADSHEET_ID
+    ? SpreadsheetApp.openById(SPREADSHEET_ID)
+    : SpreadsheetApp.getActiveSpreadsheet();
+
+  const sh = ss.getSheetByName("Relatorios");
+  if (!sh) throw new Error("Sheet 'Relatorios' não existe.");
+
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) {
+    return { sucesso: true, total: 0, dados: [] };
+  }
+
+  const tz = Session.getScriptTimeZone();
+  const values = sh.getRange(2, 1, lastRow - 1, 3).getValues(); // A2:C
+
+  const dados = values
+    .filter(r => r.some(v => v !== "" && v !== null))
+    .map((r, i) => {
+      const unidade = String(r[0] || "").trim();
+      const url = String(r[1] || "").trim();
+
+      const dt = r[2];
+      const dataEnvio = dt instanceof Date
+        ? Utilities.formatDate(dt, tz, "dd-MM-yy")
+        : String(dt || "").trim();
+
+      return {
+        ord: i + 1,
+        unidadeOrganica: unidade,
+        url: url,
+        enviado: !!url,
+        dataEnvio: url ? (dataEnvio || "") : "" // se não enviado, deixa vazio
+      };
+    });
+
+  return {
+    sucesso: true,
+    total: dados.length,
+    dados
+  };
+}
+
+
+
+
+/** ===================== Helpers ===================== **/
+
+function rowToObj_(row) {
+  const o = {};
+  for (let i = 0; i < COLS.length; i++) {
+    o[COLS[i]] = formatValue_(row[i]);
+  }
+  return o;
+}
+
+function formatValue_(v) {
+  // Converte Date para ISO (YYYY-MM-DD) para o front filtrar mais fácil
+  if (v instanceof Date && !isNaN(v.getTime())) {
+    const y = v.getFullYear();
+    const m = String(v.getMonth() + 1).padStart(2, "0");
+    const d = String(v.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  return v;
+}
+
+function jsonCore_(obj, statusCode, e) {
+  obj.httpStatus = statusCode;
+
+  const out = ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+
+  const origin = pickOrigin_(e);
+  return applyCors_(out, origin);
+}
+
+
+
+
+
+
+
+
