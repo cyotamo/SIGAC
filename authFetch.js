@@ -42,6 +42,6 @@ export async function postJSON(url, payload = {}) {
     body: JSON.stringify(payload),
   });
 
-  const data = await response.json();
+  const data = await response.text();
   return data;
 }
