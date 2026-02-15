@@ -94,6 +94,21 @@ const API_URL = WEB_URL;
     }
 
     async function chamarAPI(payload = {}) {
+      const operacao = payload.operacao || payload.acao;
+      payload.operacao = operacao;
+      delete payload.acao;
+
+      const operacoesValidas = [
+        "criar",
+        "atualizar",
+        "gerar_relatorio",
+        "gerar_relatorio_faculdade"
+      ];
+
+      if (!operacoesValidas.includes(operacao)) {
+        throw new Error(`Acção inválida: "${operacao}"`);
+      }
+
       const data = await postJSON(API_URL, payload);
       if (!data || data.sucesso !== true) {
         console.log("RESPOSTA API ->", data);
@@ -1055,31 +1070,26 @@ const API_URL = WEB_URL;
 
     async function gerarRelatorioViaAPI({ tipo, inicio, fim, formato }) {
       const feedback = $("#relatorioFeedback");
-      const email = obterEmailUtilizador();
+      const userEmail = obterEmailUtilizador();
 
       console.log("relatorioTipo.value =", tipo);
-      console.log("EMAIL_RELATORIO", email);
+      console.log("EMAIL_RELATORIO", userEmail);
 
-      const formatoBack = (formato === "xls") ? "xlsx" : formato;
+      const opcao = normalizarOpcaoRelatorioFront_(tipo);
       const porPeriodo = Boolean(inicio && fim);
+      const di = porPeriodo ? inicio : undefined;
+      const df = porPeriodo ? fim : undefined;
 
       let data;
       try {
-        const payload = {
-          operacao: "gerar_relatorio_faculdade",
-          email,
-          formato: formatoBack,
-          opcao: normalizarOpcaoRelatorioFront_(tipo),
-          tipoRelatorio: normalizarOpcaoRelatorioFront_(tipo),
+        data = await chamarAPI({
+          operacao: "gerar_relatorio",
+          email: userEmail,
+          opcao,
           porPeriodo,
-          dataInicio: porPeriodo ? inicio : undefined,
-          dataFim: porPeriodo ? fim : undefined,
-          titulo: "Relatório de Actividades"
-        };
-
-        Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
-
-        data = await chamarAPI(payload);
+          di,
+          df
+        });
       } catch (err) {
         if (feedback) {
           feedback.textContent = "Falha de rede ao gerar relatório. Verifica a ligação e tenta novamente.";
