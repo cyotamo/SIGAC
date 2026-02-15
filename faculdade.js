@@ -235,6 +235,8 @@ const API_URL = WEB_URL;
 
     async function carregarDocentesBackend() {
       const email = obterEmailUtilizador();
+      console.log("EMAIL:", email);
+
       if (!email) return;
 
       try {
@@ -243,8 +245,15 @@ const API_URL = WEB_URL;
           email: email
         });
 
-        if (resp && resp.sucesso && Array.isArray(resp.dados)) {
+        console.log("RESPOSTA BACK:", resp);
+
+        if (resp && resp.sucesso) {
+          console.log("DADOS RECEBIDOS:", resp.dados);
+
           state.docentes = resp.dados;
+
+          console.log("STATE DOCENTES:", state.docentes);
+
           render();
         } else {
           console.warn("Resposta inválida listar_docentes", resp);
