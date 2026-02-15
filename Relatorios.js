@@ -40,37 +40,44 @@ const CFG = {
 
 
 // ========= FUNÇÃO PRINCIPAL =========
-function gerarRelatorio(payload) {
-  const formato = normLower(payload.formato || "pdf");
-  const opcao = String(payload.opcao || payload.tipoRelatorio || "Todas").trim();
-  const porPeriodo = toBoolean_(payload.porPeriodo);
-  const dataInicio = porPeriodo ? parseISODate(payload.dataInicio) : null;
-  const dataFim = porPeriodo ? parseISODate(payload.dataFim) : null;
-  const titulo = String(payload.titulo || "Relatório de Actividades").trim();
+function gerarRelatorio(e) {
+  const p = (e && e.parameter) ? e.parameter : (e || {});
 
-  const email = String(payload.email || "").trim().toLowerCase();
+  const formato = normLower(p.formato || "pdf");
+  const tipoRelatorio = p.tipoRelatorio || p.opcao;
+  const opcao = String(tipoRelatorio || "Todas").trim();
+  const porPeriodo = toBoolean_(p.porPeriodo);
+  const dataInicio = p.dataInicio;
+  const dataFim = p.dataFim;
+  const titulo = String(p.titulo || "Relatório de Actividades").trim();
+
+  const email = String(p.email || "").trim().toLowerCase();
   if (!email) throw new Error("Email não foi enviado no payload.");
 
   const nomeFaculdade = getNomeFaculdadeByEmail_(email);
+  const inicio = porPeriodo ? new Date(dataInicio) : null;
+  const fim = porPeriodo ? new Date(dataFim) : null;
 
   if (!["pdf", "doc", "xlsx"].includes(formato)) {
     throw new Error("formato inválido. Use: pdf | doc | xlsx");
   }
-  if (porPeriodo && (!dataInicio || !dataFim)) {
+  if (porPeriodo && (!dataInicio || !dataFim || isNaN(inicio.getTime()) || isNaN(fim.getTime()))) {
     throw new Error("Para porPeriodo=true, envie dataInicio e dataFim (YYYY-MM-DD).");
   }
-  if (porPeriodo && dataInicio.getTime() > dataFim.getTime()) {
+  if (porPeriodo && inicio.getTime() > fim.getTime()) {
     throw new Error("dataInicio não pode ser maior que dataFim.");
   }
 
+  Logger.log({ tipoRelatorio, porPeriodo, dataInicio, dataFim });
+
   // 1) Ler e filtrar dados (AGORA PASSA O EMAIL)
-  const registos = obterRegistosFiltrados({ opcao, porPeriodo, dataInicio, dataFim, email });
+  const registos = obterRegistosFiltrados({ opcao, porPeriodo, dataInicio: inicio, dataFim: fim, email });
   if (!registos.length) throw new Error("Nenhum registo encontrado para os critérios seleccionados.");
 
   // 2) Gerar ficheiro
   const pasta = DriveApp.getFolderById(CFG.PASTA_RELATORIOS_ID);
   const carimbo = Utilities.formatDate(new Date(), "Africa/Maputo", "yyyyMMdd_HHmmss");
-  const nomeBase = `${titulo} - ${opcao}${porPeriodo ? ` (${payload.dataInicio} a ${payload.dataFim})` : ""} - ${carimbo}`;
+  const nomeBase = `${titulo} - ${opcao}${porPeriodo ? ` (${dataInicio} a ${dataFim})` : ""} - ${carimbo}`;
 
   let out;
   if (!Array.isArray(registos)) throw new Error("DEBUG: registos não é array (ver chamadas/assinaturas).");
@@ -78,17 +85,17 @@ function gerarRelatorio(payload) {
   if (formato === "doc") {
     out = gerarRelatorioDOC(
       pasta, nomeBase, titulo, nomeFaculdade,
-      opcao, porPeriodo, payload.dataInicio, payload.dataFim, registos
+      opcao, porPeriodo, dataInicio, dataFim, registos
     );
   } else if (formato === "pdf") {
     out = gerarRelatorioPDF(
       pasta, nomeBase, titulo, nomeFaculdade,
-      opcao, porPeriodo, payload.dataInicio, payload.dataFim, registos
+      opcao, porPeriodo, dataInicio, dataFim, registos
     );
   } else {
     out = gerarRelatorioXLSX(
       pasta, nomeBase, titulo, nomeFaculdade,
-      opcao, porPeriodo, payload.dataInicio, payload.dataFim, registos
+      opcao, porPeriodo, dataInicio, dataFim, registos
     );
   }
 
@@ -479,4 +486,3 @@ function fmtDateXlsx_(v) {
   const d = toDateSafe(v);
   return d ? Utilities.formatDate(d, "Africa/Maputo", "yyyy-MM-dd") : String(v || "");
 }
-
