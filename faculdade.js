@@ -2,7 +2,7 @@
     import { emailAutorizado, normalizarEmail } from "./autorizacao.js";
     import { auth } from "./firebase-init.js";
     import { carregarJSONP, postJSON } from "./authFetch.js";
-const WEB_URL = "https://script.google.com/macros/s/AKfycby40Ip2EaukgknFTPDVV9cP3kDMJA_OESvXSk9GS6cMwUgUgnEtYLTiY78HE_vie359_A/exec";
+const WEB_URL = "https://script.google.com/macros/s/AKfycbxJV8CUKlRTJTpcXjVut2LEncYz7Txaa8wZ1hRzHZgGV1IRsiG-GSp2-SAyfpU2vTDuNQ/exec";
 const API_URL = WEB_URL;
 
     let EMAIL_ATUAL = "";
