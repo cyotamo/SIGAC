@@ -1,36 +1,8 @@
-// ===== CORS (DEV + PROD) =====
-const ALLOWED_ORIGINS = [
-  "https://sigacur00.web.app",
-  "https://sigacur00.firebaseapp.com",
-  "https://cyotamo.github.io"
-];
-
-// Usa __origin enviado pelo frontend (mais fiável no Apps Script)
-function pickOrigin_(e) {
-  const p = (e && e.parameter) ? e.parameter : {};
-  const origin = String(p.__origin || "").trim();
-  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-}
-
-function applyCors_(out, origin) {
-  out.setHeader("Access-Control-Allow-Origin", origin);
-  out.setHeader("Vary", "Origin");
-  out.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  out.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-  out.setHeader("Access-Control-Max-Age", "3600");
-  return out;
-}
-
-// Preflight (browser OPTIONS)
 function doOptions(e) {
-  const origin = pickOrigin_(e);
-  // Resposta vazia/OK para preflight
-  const out = ContentService.createTextOutput("");
-  out.setMimeType(ContentService.MimeType.TEXT);
-  return applyCors_(out, origin);
+  return ContentService
+    .createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT);
 }
-
-
 
 function doGet(e) {
   try {
@@ -218,15 +190,12 @@ function formatValue_(v) {
   return v;
 }
 
-function jsonCore_(obj, statusCode, e) {
+function jsonCore_(obj, statusCode) {
   obj.httpStatus = statusCode;
 
-  const out = ContentService
+  return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
-
-  const origin = pickOrigin_(e);
-  return applyCors_(out, origin);
 }
 
 
