@@ -1068,22 +1068,39 @@ const API_URL = WEB_URL;
       const formatoBack = (formato === "xls") ? "xlsx" : formato;
       const porPeriodo = Boolean(inicio && fim);
 
-      const payload = {
-        operacao: "gerar_relatorio",
-        email: obterEmailUtilizador(),
-        formato: formatoBack,
-        opcao: normalizarOpcaoRelatorioFront_(tipo),
-        porPeriodo,
-        dataInicio: porPeriodo ? inicio : undefined,
-        dataFim: porPeriodo ? fim : undefined,
-        titulo: "Relatório de Actividades"
-      };
-
-      Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+      const emailUtilizador = obterEmailUtilizador();
+      const formatoSelecionado = formatoBack;
+      const opcaoSelecionada = normalizarOpcaoRelatorioFront_(tipo);
+      const usarPeriodo = porPeriodo;
+      const dataInicio = porPeriodo ? inicio : "";
+      const dataFim = porPeriodo ? fim : "";
+      const tituloRelatorio = "Relatório de Actividades";
 
       let data;
       try {
-        data = await chamarAPI(payload);
+        const resp = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            operacao: "gerar_relatorio",
+            email: emailUtilizador,
+            formato: formatoSelecionado,
+            opcao: opcaoSelecionada,
+            porPeriodo: usarPeriodo,
+            dataInicio: dataInicio || "",
+            dataFim: dataFim || "",
+            titulo: tituloRelatorio,
+            __origin: window.location.origin
+          })
+        });
+
+        data = await resp.json();
+
+        if (!data?.ficheiro?.url) {
+          throw new Error("Sem ficheiro.url");
+        }
       } catch (err) {
         if (feedback) {
           feedback.textContent = "Falha de rede ao gerar relatório. Verifica a ligação e tenta novamente.";
@@ -1103,15 +1120,7 @@ const API_URL = WEB_URL;
         return;
       }
 
-      const fileUrl = data?.ficheiro?.url;
-      if (!fileUrl) {
-        if (feedback) {
-          feedback.textContent = "Relatório gerado, mas não foi devolvido o link do ficheiro.";
-          feedback.classList.add("is-error");
-        }
-        console.error("Sem ficheiro.url:", data);
-        return;
-      }
+      const fileUrl = data.ficheiro.url;
 
       if (feedback) {
         feedback.textContent = "Relatório gerado com sucesso.";
