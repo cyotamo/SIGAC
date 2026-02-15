@@ -1078,22 +1078,21 @@ const API_URL = WEB_URL;
 
       let data;
       try {
+        const payload = new URLSearchParams({
+          operacao: "gerar_relatorio",
+          email: emailUtilizador,
+          formato: formatoSelecionado,
+          opcao: opcaoSelecionada,
+          porPeriodo: String(usarPeriodo),
+          dataInicio: dataInicio || "",
+          dataFim: dataFim || "",
+          titulo: tituloRelatorio,
+          __origin: window.location.origin
+        });
+
         const resp = await fetch(API_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            operacao: "gerar_relatorio",
-            email: emailUtilizador,
-            formato: formatoSelecionado,
-            opcao: opcaoSelecionada,
-            porPeriodo: usarPeriodo,
-            dataInicio: dataInicio || "",
-            dataFim: dataFim || "",
-            titulo: tituloRelatorio,
-            __origin: window.location.origin
-          })
+          body: payload
         });
 
         data = await resp.json();
