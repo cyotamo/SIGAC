@@ -1,0 +1,15 @@
+name: Guard GitHub Pages Redirects
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  prevent-hardcoded-redirect-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate published files do not hardcode Firebase Hosting domains
+        run: ./scripts/check-pages-redirects.sh
