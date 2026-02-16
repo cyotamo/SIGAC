@@ -7,19 +7,16 @@
   <title>Sistema Integrado de Gestão de Actividades Científicas - SIGAC</title>
   <meta name="description" content="SIGAC — Sistema Integrado de Gestão de Actividades Científicas da Universidade Rovuma." />
 
-  <link rel="canonical" href="https://sigacur00.web.app/" />
-
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/logo.png" />
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0f3d8a" />
 
   <!-- Open Graph (WhatsApp/Facebook) -->
   <meta property="og:title" content="Sistema Integrado de Gestão de Actividades Científicas - SIGAC" />
   <meta property="og:description" content="Plataforma da Universidade Rovuma para a gestão de actividades científicas." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://sigacur00.web.app/" />
-  <meta property="og:image" content="https://sigacur00.web.app/assets/og-image-v2.png" />
+  <meta property="og:image" content="assets/og-image-v2.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:type" content="image/png" />
@@ -28,20 +25,25 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Sistema Integrado de Gestão de Actividades Científicas - SIGAC" />
   <meta name="twitter:description" content="Plataforma da Universidade Rovuma para a gestão de actividades científicas." />
-  <meta name="twitter:image" content="https://sigacur00.web.app/assets/og-image-v2.png" />
+  <meta name="twitter:image" content="assets/og-image-v2.png" />
 
   <script>
-
     (() => {
-      const allowedOrigin = 'https://sigacur00.web.app';
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const currentUrl = new URL(window.location.href);
+      const normalized = `${currentUrl.origin}${currentUrl.pathname}`;
 
-      if (window.location.origin !== allowedOrigin && !isLocalhost) {
-        window.location.replace('https://sigacur00.web.app/');
-      }
+      const canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      canonical.href = normalized;
+      document.head.appendChild(canonical);
+
+      const ogUrl = document.createElement("meta");
+      ogUrl.setAttribute("property", "og:url");
+      ogUrl.content = normalized;
+      document.head.appendChild(ogUrl);
     })();
   </script>
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
@@ -78,11 +80,11 @@
     </section>
   </main>
 
-  <script type="module" src="/login.js"></script>
+  <script type="module" src="login.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js");
+        navigator.serviceWorker.register("service-worker.js");
       });
     }
   </script>
