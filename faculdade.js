@@ -260,6 +260,8 @@ let docentesRemotos = false;
 
     async function carregarDocentesBackend() {
       console.log("[DOCENTES] entrou carregarDocentesBackend");
+      document.querySelector("#theadDocentes").innerHTML = "";
+      renderLoading("#tbDocentes", 14);
       const email = obterEmailUtilizador();
       console.log("[DOCENTES] email", email);
       console.log("[DOCENTES] API_URL", API_URL);
