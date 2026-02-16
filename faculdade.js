@@ -304,7 +304,8 @@ let docentesRemotos = false;
       page: {
         cadastradas: 1,
         executadas: 1,
-        canceladas: 1
+        canceladas: 1,
+        docentes: 1
       }
     };
 
@@ -459,6 +460,7 @@ let docentesRemotos = false;
         if (state.docentes.length === 0) {
           document.querySelector("#theadDocentes").innerHTML = "";
           renderEmpty("#tbDocentes", 14);
+          renderPagination("docentes", 0);
           return;
         }
 
@@ -475,8 +477,9 @@ let docentesRemotos = false;
         document.querySelector("#theadDocentes").innerHTML = headHtml;
 
         let html = "";
+        const docentesPage = paginar(state.docentes, "docentes");
 
-        state.docentes.forEach((doc) => {
+        docentesPage.forEach((doc) => {
           html += "<tr>";
 
           Object.values(doc).forEach((valor) => {
@@ -487,6 +490,7 @@ let docentesRemotos = false;
         });
 
         document.querySelector("#tbDocentes").innerHTML = html;
+        renderPagination("docentes", state.docentes.length);
         return;
       }
 
