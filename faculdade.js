@@ -261,18 +261,14 @@ let docentesRemotos = false;
     async function carregarDocentesBackend() {
       console.log("[DOCENTES] entrou carregarDocentesBackend");
       const email = obterEmailUtilizador();
-      console.log("[DOCENTES] email", obterEmailUtilizador());
+      console.log("[DOCENTES] email", email);
       console.log("[DOCENTES] API_URL", API_URL);
       console.log("EMAIL:", email);
 
       if (!email) return;
 
       try {
-        const params = new URLSearchParams({
-          operacao: "listar_docentes",
-          email
-        });
-        const url = `${API_URL}?${params.toString()}`;
+        const url = `${API_URL}?operacao=listar_docentes&email=${encodeURIComponent(email)}`;
         console.log("[DOCENTES] vai enviar GET/JSONP", url);
         const resp = await carregarJSONP(url);
 
