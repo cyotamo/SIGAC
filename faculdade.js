@@ -119,8 +119,7 @@ let docentesRemotos = false;
         "criar",
         "atualizar",
         "gerar_relatorio",
-        "gerar_relatorio_faculdade",
-        "listar_docentes"
+        "gerar_relatorio_faculdade"
       ];
 
       if (!operacoesValidas.includes(operacao)) {
@@ -268,9 +267,9 @@ let docentesRemotos = false;
       if (!email) return;
 
       try {
-        const url = `${API_URL}?operacao=listar_docentes&email=${encodeURIComponent(email)}`;
-        console.log("[DOCENTES] vai enviar GET/JSONP", url);
-        const resp = await carregarJSONP(url);
+        const docentesUrl = `${API_URL}?operacao=listar_docentes&email=${encodeURIComponent(email)}`;
+        console.log("[DOCENTES] vai enviar GET/JSONP", docentesUrl);
+        const resp = await carregarJSONP(`${API_URL}?operacao=listar_docentes&email=${encodeURIComponent(email)}`);
 
         console.log("RESPOSTA BACK:", resp);
         console.log("[DOCENTES] resposta", resp);
