@@ -268,12 +268,13 @@ let docentesRemotos = false;
       if (!email) return;
 
       try {
-        const payload = {
+        const params = new URLSearchParams({
           operacao: "listar_docentes",
-          email: email
-        };
-        console.log("[DOCENTES] vai enviar POST", payload);
-        const resp = await postJSON(API_URL, payload);
+          email
+        });
+        const url = `${API_URL}?${params.toString()}`;
+        console.log("[DOCENTES] vai enviar GET/JSONP", url);
+        const resp = await carregarJSONP(url);
 
         console.log("RESPOSTA BACK:", resp);
         console.log("[DOCENTES] resposta", resp);
