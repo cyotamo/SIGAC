@@ -137,10 +137,13 @@ let docentesRemotos = false;
       return data;
     }
 
-    async function postJSON(url, payload) {
+    async function postJSON(url, dados) {
+      const form = new URLSearchParams();
+      Object.entries(dados || {}).forEach(([k, v]) => form.append(k, String(v ?? "")));
+
       const res = await fetch(url, {
         method: "POST",
-        body: new URLSearchParams(payload)
+        body: form
       });
 
       if (!res.ok) {

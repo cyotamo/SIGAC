@@ -33,9 +33,12 @@ export function carregarJSONP(url) {
 }
 
 export async function postJSON(url, payload = {}) {
+  const form = new URLSearchParams();
+  Object.entries(payload || {}).forEach(([k, v]) => form.append(k, String(v ?? "")));
+
   const response = await fetch(url, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: form,
   });
 
   const data = await response.json();
