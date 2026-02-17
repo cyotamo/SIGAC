@@ -361,11 +361,37 @@ const API_URL = WEB_URL;
       return n.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " MZN";
     };
 
+    const PT_MONTHS_SHORT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+    function parseISODateLocal(value) {
+      if (!value) return null;
+      const raw = String(value).trim();
+      const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) {
+        const year = Number(m[1]);
+        const month = Number(m[2]);
+        const day = Number(m[3]);
+        const local = new Date(year, month - 1, day);
+        if (!Number.isNaN(local.getTime())) return local;
+      }
+
+      const fallback = new Date(raw);
+      return Number.isNaN(fallback.getTime()) ? null : fallback;
+    }
+
+    function fmtDiaMes(value) {
+      const d = parseISODateLocal(value);
+      if (!d) return "—";
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = PT_MONTHS_SHORT[d.getMonth()] || "";
+      return `${day}/${month}`;
+    }
+
     const fmtPeriodo = (ini, fim) => {
       if (!ini && !fim) return "—";
-      const a = ini ? new Date(ini).toLocaleDateString("pt-PT") : "—";
-      const b = fim ? new Date(fim).toLocaleDateString("pt-PT") : "—";
-      return `${a} → ${b}`;
+      const a = ini ? fmtDiaMes(ini) : "—";
+      const b = fim ? fmtDiaMes(fim) : "—";
+      return `${a} - ${b}`;
     };
 
     function toDateOnly(dateValue) {
