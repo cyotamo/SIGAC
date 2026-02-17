@@ -444,7 +444,7 @@ const API_URL = WEB_URL;
         <tr class="${getRowClassByEstado(estadoVisual)}">
           <td><strong>${idx + 1}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
-          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td><div style="font-weight:400">${escapeHtml(a.accao)}</div></td>
           <td>${escapeHtml(a.local || "—")}</td>
           <td class="periodo-cell">${renderPeriodoComAlerta(a)}</td>
           <td>${fmtMoney(a.orcamento)}</td>
@@ -461,7 +461,7 @@ const API_URL = WEB_URL;
           <td><strong>${idx + 1}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
           <td>
-            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
+            <div style="font-weight:400">${escapeHtml(a.accao)}</div>
           </td>
           <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.resp || "—")}</td>
@@ -482,7 +482,7 @@ const API_URL = WEB_URL;
           <td><strong>${idx + 1}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
           <td>
-            <div style="font-weight:900">${escapeHtml(a.accao)}</div>
+            <div style="font-weight:400">${escapeHtml(a.accao)}</div>
           </td>
           <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.motivo || "—")}</td>

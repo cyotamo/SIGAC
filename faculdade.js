@@ -510,7 +510,7 @@ let docentesRemotos = false;
         <tr class="${getRowClassByEstado(estadoVisual)}">
           <td><strong>${getNumeroOrdem("cadastradas", idx)}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
-          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td><div style="font-weight:400">${escapeHtml(a.accao)}</div></td>
           <td>${escapeHtml(a.local || "—")}</td>
           <td class="periodo-cell">${renderPeriodoComAlerta(a)}</td>
           <td>${fmtMoney(a.orcamento)}</td>
@@ -532,7 +532,7 @@ let docentesRemotos = false;
         <tr class="${getRowClassByEstado("Executada")}">
           <td><strong>${getNumeroOrdem("executadas", idx)}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
-          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td><div style="font-weight:400">${escapeHtml(a.accao)}</div></td>
           <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.resp || "—")}</td>
           <td>
@@ -554,7 +554,7 @@ let docentesRemotos = false;
         <tr class="${getRowClassByEstado("Cancelada")}">
           <td><strong>${getNumeroOrdem("canceladas", idx)}</strong></td>
           <td>${renderAreaTag(a.area)}</td>
-          <td><div style="font-weight:900">${escapeHtml(a.accao)}</div></td>
+          <td><div style="font-weight:400">${escapeHtml(a.accao)}</div></td>
           <td class="periodo-cell">${fmtPeriodo(a.inicio, a.fim)}</td>
           <td>${escapeHtml(a.motivo || "—")}</td>
           <td>${chipEstado("Cancelada")}</td>
